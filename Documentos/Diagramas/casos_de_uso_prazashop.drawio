@@ -1,0 +1,163 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0" version="29.6.6">
+  <diagram id="prazashop-casos-uso" name="Casos de uso PrazaShop">
+    <mxGraphModel dx="2578" dy="1418" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="system" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="980" width="980" x="220" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_busqueda" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Buscar o filtrar productos" vertex="1">
+          <mxGeometry height="60" width="240" x="240" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_compra" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Realizar compra" vertex="1">
+          <mxGeometry height="60" width="200" x="250" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_pedidos_negocio" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Gestionar pedidos recibidos" vertex="1">
+          <mxGeometry height="60" width="250" x="230" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_valoraciones" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar valoraciones" vertex="1">
+          <mxGeometry height="60" width="220" x="240" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_supervisar" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Supervisar negocios publicados" vertex="1">
+          <mxGeometry height="60" width="260" x="660" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_moderar" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Moderar valoraciones o contenido reportado" vertex="1">
+          <mxGeometry height="60" width="320" x="650" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="e25" edge="1" parent="system" source="uc_moderar" style="dashed=1;endArrow=block;endFill=0;html=1;" target="uc_valoraciones" value="&lt;&lt;include&gt;&gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_productos" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar productos" vertex="1">
+          <mxGeometry height="60" width="220" x="610" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="system" source="uc_busqueda" style="dashed=1;endArrow=block;endFill=0;html=1;" target="uc_productos" value="&amp;lt;Extends&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e21" edge="1" parent="system" source="uc_compra" style="dashed=1;endArrow=block;endFill=0;html=1;" target="uc_productos" value="&amp;lt;Include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_gestion_usuarios" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Gestionar usuarios" vertex="1">
+          <mxGeometry height="60" width="200" x="720" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_gestion_ofertas" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Gestionar ofertas y duracion" vertex="1">
+          <mxGeometry height="60" width="240" x="235" y="810" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_vigencia" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Definir vigencia de ofertas" vertex="1">
+          <mxGeometry height="60" width="230" x="530" y="810" as="geometry" />
+        </mxCell>
+        <mxCell id="e24" edge="1" parent="system" source="uc_gestion_ofertas" style="dashed=1;endArrow=block;endFill=0;html=1;" target="uc_vigencia" value="&amp;lt;Include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_edicion" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Editar o eliminar productos" vertex="1">
+          <mxGeometry height="60" width="240" x="240" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_publicar" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Publicar productos" vertex="1">
+          <mxGeometry height="60" width="210" x="250" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_auth" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Registrarse / iniciar sesion" vertex="1">
+          <mxGeometry height="60" width="230" x="235" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_pago" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Procesar pago" vertex="1">
+          <mxGeometry height="60" width="180" x="740" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e22" edge="1" parent="system" source="uc_compra" style="dashed=1;endArrow=block;endFill=0;html=1;" target="uc_pago" value="&amp;lt;Include&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_ofertas" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar ofertas vigentes" vertex="1">
+          <mxGeometry height="60" width="240" x="240" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="e20" edge="1" parent="system" source="uc_ofertas" style="dashed=1;endArrow=block;endFill=0;html=1;" target="uc_productos" value="&amp;lt;Extends&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_recurrencia" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Configurar compra recurrente" vertex="1">
+          <mxGeometry height="60" width="260" x="220" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="e23" edge="1" parent="system" source="uc_recurrencia" style="dashed=1;endArrow=block;endFill=0;html=1;" target="uc_compra" value="&amp;lt;Extends&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_valorar" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Valorar negocio" vertex="1">
+          <mxGeometry height="60" width="190" x="80" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_pedidos" parent="system" style="ellipse;whiteSpace=wrap;html=1;" value="Consultar pedidos" vertex="1">
+          <mxGeometry height="60" width="190" x="70" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_cliente" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="Cliente" vertex="1">
+          <mxGeometry height="120" width="60" x="60" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_negocio" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="Negocio local" vertex="1">
+          <mxGeometry height="120" width="80" x="70" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="Administrador" vertex="1">
+          <mxGeometry height="120" width="80" x="1310" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_pago" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value="Plataforma de pago externa" vertex="1">
+          <mxGeometry height="120" width="140" x="1270" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="actor_cliente" style="endArrow=none;html=1;" target="uc_auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="actor_cliente" style="endArrow=none;html=1;" target="uc_busqueda">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="actor_cliente" style="endArrow=none;html=1;" target="uc_ofertas">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="actor_cliente" style="endArrow=none;html=1;" target="uc_compra">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="actor_cliente" style="endArrow=none;html=1;" target="uc_recurrencia">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="actor_cliente" style="endArrow=none;html=1;" target="uc_valorar">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="actor_cliente" style="endArrow=none;html=1;" target="uc_pedidos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="actor_negocio" style="endArrow=none;html=1;" target="uc_auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="actor_negocio" style="endArrow=none;html=1;" target="uc_publicar">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="actor_negocio" style="endArrow=none;html=1;" target="uc_edicion">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="actor_negocio" style="endArrow=none;html=1;" target="uc_gestion_ofertas">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="actor_negocio" style="endArrow=none;html=1;" target="uc_pedidos_negocio">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="actor_negocio" style="endArrow=none;html=1;" target="uc_valoraciones">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;" target="uc_gestion_usuarios">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;" target="uc_supervisar">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;" target="uc_moderar">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="actor_pago" style="endArrow=none;html=1;" target="uc_pago">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="1cYrPeJUH-uYwMwQA79--1" edge="1" parent="1" source="actor_admin" style="endArrow=none;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0.398;exitY=0.346;exitDx=0;exitDy=0;exitPerimeter=0;" target="uc_auth">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1396" y="478" as="sourcePoint" />
+            <mxPoint x="1230" y="410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="1cYrPeJUH-uYwMwQA79--2" edge="1" parent="1" source="actor_cliente" style="endArrow=none;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" target="uc_valoraciones">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="310" y="290" as="sourcePoint" />
+            <mxPoint x="654" y="381" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
