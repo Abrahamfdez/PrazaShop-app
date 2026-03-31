@@ -1,0 +1,113 @@
+package org.example.prazashop.service.impl;
+
+import org.example.prazashop.exception.BadRequestException;
+import org.example.prazashop.exception.NotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.example.prazashop.model.dto.ProductoDto;
+import org.example.prazashop.model.entity.Negocio;
+import org.example.prazashop.model.entity.Producto;
+import org.example.prazashop.repository.NegocioRepository;
+import org.example.prazashop.repository.ProductoRepository;
+import org.example.prazashop.service.ProductoService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class ProductoServiceImpl implements ProductoService {
+
+    private final ProductoRepository productoRepository;
+    private final NegocioRepository negocioRepository;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductoDto> findAll() {
+        return productoRepository.findAll().stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<ProductoDto> findById(Long id) {
+        return productoRepository.findById(id).map(this::toDto);
+    }
+
+    @Override
+    public ProductoDto create(ProductoDto producto) {
+        validateDto(producto);
+        Producto entity = new Producto();
+        applyDto(entity, producto);
+        return toDto(productoRepository.save(entity));
+    }
+
+    @Override
+    public ProductoDto update(Long id, ProductoDto producto) {
+        Producto existing = productoRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Producto no encontrado con id " + id));
+        validateDto(producto);
+        applyDto(existing, producto);
+        return toDto(productoRepository.save(existing));
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        if (!productoRepository.existsById(id)) {
+            throw new NotFoundException("Producto no encontrado con id " + id);
+        }
+        productoRepository.deleteById(id);
+    }
+
+    private ProductoDto toDto(Producto producto) {
+        return ProductoDto.builder()
+                .id(producto.getIdProducto())
+                .negocioId(producto.getNegocio() != null ? producto.getNegocio().getIdNegocio() : null)
+                .nome(producto.getNome())
+                .descricion(producto.getDescricion())
+                .prezo(producto.getPrezo())
+                .stock(producto.getStock())
+                .categoria(producto.getCategoria())
+                .duracionOferta(producto.getDuracionOferta())
+                .imaxe(producto.getImaxe())
+                .estado(producto.getEstado())
+                .build();
+    }
+
+    private void applyDto(Producto producto, ProductoDto dto) {
+        if (dto.getNegocioId() != null) {
+            Negocio negocio = negocioRepository.findById(dto.getNegocioId())
+                    .orElseThrow(() -> new NotFoundException("Negocio no encontrado con id " + dto.getNegocioId()));
+            producto.setNegocio(negocio);
+        } else if (producto.getNegocio() == null) {
+            throw new BadRequestException("negocioId es obligatorio");
+        }
+        producto.setNome(dto.getNome());
+        producto.setDescricion(dto.getDescricion());
+        producto.setPrezo(dto.getPrezo());
+        producto.setStock(dto.getStock());
+        producto.setCategoria(dto.getCategoria());
+        producto.setDuracionOferta(dto.getDuracionOferta());
+        producto.setImaxe(dto.getImaxe());
+        producto.setEstado(dto.getEstado());
+    }
+
+    private void validateDto(ProductoDto dto) {
+        if (dto == null) {
+            throw new BadRequestException("El cuerpo de producto es obligatorio");
+        }
+        if (!StringUtils.hasText(dto.getNome())) {
+            throw new BadRequestException("nome es obligatorio");
+        }
+        if (dto.getPrezo() == null || dto.getPrezo() < 0) {
+            throw new BadRequestException("prezo debe ser mayor o igual a 0");
+        }
+        if (dto.getStock() == null || dto.getStock() < 0) {
+            throw new BadRequestException("stock debe ser mayor o igual a 0");
+        }
+    }
+}
