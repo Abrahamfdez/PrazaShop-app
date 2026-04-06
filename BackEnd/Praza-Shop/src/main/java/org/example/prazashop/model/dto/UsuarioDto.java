@@ -6,6 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.prazashop.model.TipoUsuario;
 
+/**
+ * The type Usuario dto.
+ */
 @Data
 @Builder
 @NoArgsConstructor

@@ -2,7 +2,14 @@ package org.example.prazashop.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.prazashop.auth.repository.Token;
 import org.example.prazashop.model.TipoUsuario;
+
+import java.util.List;
+
+/**
+ * The type Usuario.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,5 +34,7 @@ public class Usuario {
 
     @Enumerated(EnumType.STRING)
     private TipoUsuario tipoUsuario;
+    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
+    private List<Token> tokens;
 
 }

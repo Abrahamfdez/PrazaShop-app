@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+
+/**
+ * The type Pedido.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

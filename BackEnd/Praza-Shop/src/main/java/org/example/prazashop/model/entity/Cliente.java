@@ -3,6 +3,9 @@ package org.example.prazashop.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * The type Cliente.
+ */
 @Getter
 @Setter
 @Builder

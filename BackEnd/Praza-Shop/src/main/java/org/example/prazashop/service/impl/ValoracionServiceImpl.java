@@ -17,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type Valoracion service.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

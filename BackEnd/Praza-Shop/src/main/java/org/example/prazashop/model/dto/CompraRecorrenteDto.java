@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+/**
+ * The type Compra recorrente dto.
+ */
 @Data
 @Builder
 @NoArgsConstructor

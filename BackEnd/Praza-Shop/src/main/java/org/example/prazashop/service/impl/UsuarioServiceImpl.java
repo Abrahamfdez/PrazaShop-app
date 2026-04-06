@@ -14,6 +14,9 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type Usuario service.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

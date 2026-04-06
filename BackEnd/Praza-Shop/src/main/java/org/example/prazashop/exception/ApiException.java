@@ -9,11 +9,22 @@ public abstract class ApiException extends RuntimeException {
 
     private final HttpStatus status;
 
+    /**
+     * Instantiates a new Api exception.
+     *
+     * @param status  the status
+     * @param message the message
+     */
     protected ApiException(HttpStatus status, String message) {
         super(message);
         this.status = status;
     }
 
+    /**
+     * Gets status.
+     *
+     * @return the status
+     */
     public HttpStatus getStatus() {
         return status;
     }

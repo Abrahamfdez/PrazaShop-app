@@ -1,0 +1,7 @@
+application:
+  security:
+    jwt:
+      secret-key: Mcverewrsdsdsdsdjjeodjpejpfjpsjfjswjdosjdjposkjdsojjjj
+      expiration: 3600000
+      refresh-token:
+        expiration: 86400000

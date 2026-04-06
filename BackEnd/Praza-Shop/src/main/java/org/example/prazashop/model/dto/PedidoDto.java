@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * The type Pedido dto.
+ */
 @Data
 @Builder
 @NoArgsConstructor

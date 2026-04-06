@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * The type Producto dto.
+ */
 @Data
 @Builder
 @NoArgsConstructor

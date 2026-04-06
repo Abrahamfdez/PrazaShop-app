@@ -5,6 +5,9 @@ import lombok.*;
 
 import java.time.LocalDate;
 
+/**
+ * The type Compra recorrente.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
