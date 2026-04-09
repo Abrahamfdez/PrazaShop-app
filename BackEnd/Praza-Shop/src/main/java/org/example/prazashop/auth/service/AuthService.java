@@ -71,7 +71,6 @@ public class AuthService {
                     .build();
 
         } catch (DataIntegrityViolationException ex) {
-            // Manejo del caso raro: validación previa pasó pero la BD lanzó unique constraint
             // Retornar Conflict para indicar que ya existe un recurso con ese identificador.
             throw new ConflictException("Email ya registrado");
         }
@@ -84,17 +83,28 @@ public class AuthService {
      * @return the token response
      */
     public TokenResponse login(LoginRequest loginRequest) {
+        // Buscamos el correo en la BD o Lanzamos Excepcion
         var user = usuarioRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new BadRequestException("Usuario incorrecto"));
+        // Comporbamos si hay mach enj las contraseñas
         if (!passwordEncoder.matches(loginRequest.getContrasinal(), user.getContrasinal())) {
-            throw new RuntimeException("Contraseña incorrecta");
+            throw new BadRequestException("Contraseña  incorrecta");
         }
+        // Revocar todos los access tokens anteriores del usuario antes de guardar el nuevo
+        java.util.List<Token> tokens = tokenRepository.findAllByUsuarioId(user.getId());
+        for (Token t : tokens) {
+            if (t.getTipoToken() == Token.TipoToken.ACCESS && !t.isRevocado() && !t.isExpirado()) {
+                t.setRevocado(true);
+                t.setExpirado(true);
+                tokenRepository.save(t);
+            }
+        }
+        // Generamos tokens y los guardamos
         var jwtToken = JwtService.generateToken(user);
         var refreshToken = JwtService.generateRefreshToken(user);
         saveUserToken(user, jwtToken, Token.TipoToken.ACCESS);
         saveUserToken(user, refreshToken, Token.TipoToken.REFRESH);
-        return new TokenResponse()
-                .builder()
+        return TokenResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -121,7 +131,7 @@ public class AuthService {
         // Se acepta como "Bearer <token>" o token solo
         String refreshToken = rawRefreshToken.startsWith("Bearer ") ? rawRefreshToken.substring(7) : rawRefreshToken;
 
-        // extrae username (email)
+        // extrae  (email)
         String email;
         try {
             email = JwtService.extractUsername(refreshToken);
@@ -157,12 +167,21 @@ public class AuthService {
         // generar nuevo access token (no regeneramos refresh por defecto)
         var newAccessToken = JwtService.generateToken(user);
 
-        // guardar nuevo access token y opcionalmente revocar tokens antiguos (ejemplo: no revocamos aquí)
+        // guardar nuevo access token y  revocar tokens antiguos (ejemplo: no revocamos aquí)
+
+        List<Token> tokens = tokenRepository.findAllByUsuarioId(user.getId());
+        for (Token t : tokens) {
+            if (t.getTipoToken() == Token.TipoToken.ACCESS && !t.isRevocado() && !t.isExpirado()) {
+                t.setRevocado(true);
+                t.setExpirado(true);
+                tokenRepository.save(t);
+            }
+        }
         saveUserToken(user, newAccessToken, Token.TipoToken.ACCESS);
 
         return TokenResponse.builder()
                 .accessToken(newAccessToken)
-                .refreshToken(refreshToken) // devolvemos el mismo refresh token. Si quieres rotar, generar nuevo y guardar.
+                .refreshToken(refreshToken)
                 .build();
     }
 }
