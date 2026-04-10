@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/auth_response.dart';
 import '../models/product.dart';
@@ -27,40 +28,58 @@ class ApiService {
 
   Future<AuthResponse> register(Map<String, dynamic> body) async {
     final uri = Uri.parse('$baseUrl/api/auth/register');
-    final res = await http.post(uri, headers: _defaultHeaders(), body: json.encode(body));
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      final data = json.decode(res.body);
-      final auth = AuthResponse.fromJson(data);
-      setTokens(accessToken: auth.accessToken, refreshToken: auth.refreshToken);
-      return auth;
+    try {
+      final res = await http.post(uri, headers: _defaultHeaders(), body: json.encode(body));
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        final data = json.decode(res.body);
+        final auth = AuthResponse.fromJson(data);
+        setTokens(accessToken: auth.accessToken, refreshToken: auth.refreshToken);
+        return auth;
+      }
+      throw Exception('Register failed: ${res.statusCode} ${res.body}');
+    } on SocketException catch (e) {
+      throw Exception('Network error (register): ${e.message}');
+    } catch (e) {
+      throw Exception('Register error: $e');
     }
-    throw Exception('Register failed: ${res.statusCode} ${res.body}');
   }
 
   Future<AuthResponse> login(String email, String contrasinal) async {
     final uri = Uri.parse('$baseUrl/api/auth/login');
-    final res = await http.post(uri,
-        headers: _defaultHeaders(), body: json.encode({'email': email, 'contrasinal': contrasinal}));
-    if (res.statusCode == 200) {
-      final data = json.decode(res.body);
-      final auth = AuthResponse.fromJson(data);
-      setTokens(accessToken: auth.accessToken, refreshToken: auth.refreshToken);
-      return auth;
+    try {
+      final res = await http.post(uri,
+          headers: _defaultHeaders(), body: json.encode({'email': email, 'contrasinal': contrasinal}));
+      if (res.statusCode == 200) {
+        final data = json.decode(res.body);
+        final auth = AuthResponse.fromJson(data);
+        setTokens(accessToken: auth.accessToken, refreshToken: auth.refreshToken);
+        return auth;
+      }
+      throw Exception('Login failed: ${res.statusCode} ${res.body}');
+    } on SocketException catch (e) {
+      throw Exception('Network error (login): ${e.message}');
+    } catch (e) {
+      throw Exception('Login error: $e');
     }
-    throw Exception('Login failed: ${res.statusCode} ${res.body}');
   }
 
   Future<AuthResponse> refresh() async {
     if (_refreshToken == null) throw Exception('No refresh token available');
     final uri = Uri.parse('$baseUrl/api/auth/refresh');
-    final res = await http.post(uri,
-        headers: _defaultHeaders(), body: json.encode({'refreshToken': _refreshToken}));
-    if (res.statusCode == 200) {
-      final data = json.decode(res.body);
-      final auth = AuthResponse.fromJson(data);
-      setTokens(accessToken: auth.accessToken, refreshToken: auth.refreshToken);
-      return auth;
+    try {
+      final res = await http.post(uri,
+          headers: _defaultHeaders(), body: json.encode({'refreshToken': _refreshToken}));
+      if (res.statusCode == 200) {
+        final data = json.decode(res.body);
+        final auth = AuthResponse.fromJson(data);
+        setTokens(accessToken: auth.accessToken, refreshToken: auth.refreshToken);
+        return auth;
+      }
+      throw Exception('Refresh failed: ${res.statusCode} ${res.body}');
+    } on SocketException catch (e) {
+      throw Exception('Network error (refresh): ${e.message}');
+    } catch (e) {
+      throw Exception('Refresh error: $e');
     }
-    throw Exception('Refresh failed: ${res.statusCode} ${res.body}');
   }
 }
