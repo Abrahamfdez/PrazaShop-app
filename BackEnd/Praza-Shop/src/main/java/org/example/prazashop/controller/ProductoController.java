@@ -6,6 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 /**
@@ -17,6 +21,7 @@ import java.util.List;
 public class ProductoController {
 
     private final ProductoService productoService;
+    private static final Logger logger = LoggerFactory.getLogger(ProductoController.class);
 
     public ProductoController(ProductoService productoService) {
         this.productoService = productoService;
@@ -28,8 +33,10 @@ public class ProductoController {
      * @return lista de productos
      */
     @GetMapping
-    public ResponseEntity<List<ProductoDto>> getAllProductos() {
+    public ResponseEntity<List<ProductoDto>> getAllProductos(HttpServletRequest request) {
+        logger.info("GET /api/productos invoked - Authorization present: {}", request.getHeader("Authorization") != null);
         List<ProductoDto> productos = productoService.findAll();
+        logger.info("ProductoService.findAll returned {} items", productos == null ? 0 : productos.size());
         return ResponseEntity.ok(productos);
     }
 
