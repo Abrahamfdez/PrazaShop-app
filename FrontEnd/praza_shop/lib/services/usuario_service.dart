@@ -9,7 +9,7 @@ class UsuarioService {
 
   Future<List<Usuario>> getAll() async {
     final uri = Uri.parse('${api.baseUrl}/api/usuarios');
-    final res = await http.get(uri, headers: api.headers(jsonBody: false));
+    final res = await http.get(uri, headers: api.headers()).timeout(const Duration(seconds: 10));
     if (res.statusCode == 200) {
       final data = json.decode(res.body) as List<dynamic>;
       return data.map((e) => Usuario.fromJson(e as Map<String, dynamic>)).toList();
@@ -19,21 +19,21 @@ class UsuarioService {
 
   Future<Usuario> getById(int id) async {
     final uri = Uri.parse('${api.baseUrl}/api/usuarios/$id');
-    final res = await http.get(uri, headers: api.headers(jsonBody: false));
+    final res = await http.get(uri, headers: api.headers()).timeout(const Duration(seconds: 20));
     if (res.statusCode == 200) return Usuario.fromJson(json.decode(res.body));
     throw Exception('Get usuario failed: ${res.statusCode} ${res.body}');
   }
 
   Future<Usuario> create(Usuario u) async {
     final uri = Uri.parse('${api.baseUrl}/api/usuarios');
-    final res = await http.post(uri, headers: api.headers(), body: json.encode(u.toJson()));
+    final res = await http.post(uri, headers: api.headers(), body: json.encode(u.toJson())).timeout(const Duration(seconds: 10));
     if (res.statusCode == 200 || res.statusCode == 201) return Usuario.fromJson(json.decode(res.body));
     throw Exception('Create usuario failed: ${res.statusCode} ${res.body}');
   }
 
   Future<Usuario> update(int id, Usuario u) async {
     final uri = Uri.parse('${api.baseUrl}/api/usuarios/$id');
-    final res = await http.put(uri, headers: api.headers(), body: json.encode(u.toJson()));
+    final res = await http.put(uri, headers: api.headers(), body: json.encode(u.toJson())).timeout(const Duration(seconds: 10)) ;
     if (res.statusCode == 200) return Usuario.fromJson(json.decode(res.body));
     throw Exception('Update usuario failed: ${res.statusCode} ${res.body}');
   }

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/auth_response.dart';
-import '../models/product.dart';
 
 class ApiService {
   final String baseUrl;

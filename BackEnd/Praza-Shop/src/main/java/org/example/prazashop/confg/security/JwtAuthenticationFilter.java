@@ -67,9 +67,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Validar que el token no esté revocado ni expirado en BD
         Optional<Token> tokenOpt = tokenRepository.findByToken(jwt);
         if (tokenOpt.isEmpty() || tokenOpt.get().isRevocado() || tokenOpt.get().isExpirado()) {
-         filterChain.doFilter(request, response);
-        return;
+            filterChain.doFilter(request, response);
+            return;
         }
 
+        // Token válido: continuar la cadena de filtros
+        filterChain.doFilter(request, response);
     }
 }

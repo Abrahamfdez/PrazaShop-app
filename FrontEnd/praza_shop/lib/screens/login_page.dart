@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../services/usuario_service.dart';
+import '../models/usuario.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -29,14 +32,45 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final auth = await widget.api.login(_emailCtl.text.trim(), _passCtl.text);
       widget.api.setTokens(accessToken: auth.accessToken, refreshToken: auth.refreshToken);
+      // Intent: decode token to get user id (jti) and fetch user details
+      int? userId;
+      try {
+        final payload = _parseJwt(auth.accessToken);
+        final idVal = payload['jti'] ?? payload['id'];
+        if (idVal != null) userId = int.tryParse(idVal.toString());
+      } catch (_) {
+        userId = null;
+      }
+
+      String info = _emailCtl.text;
+      if (userId != null) {
+        try {
+          final usuario = await UsuarioService(widget.api).getById(userId);
+          info = 'Tipo usuario: ${usuario.tipoUsuario} - ${usuario.nome}';
+        } catch (e) {
+          info = 'Usuario ID $userId (no se pudo obtener detalles)';
+        }
+      }
+
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const Scaffold(body: Center(child: Text('Login successful!')))));
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => Scaffold(body: Center(child: Text('Login successful! $info')))));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error : $e')));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Map<String, dynamic> _parseJwt(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) throw Exception('Token inválido');
+    final payload = parts[1];
+    final normalized = base64Url.normalize(payload);
+    final decoded = utf8.decode(base64Url.decode(normalized));
+    final map = json.decode(decoded);
+    if (map is! Map<String, dynamic>) throw Exception('Payload inválido');
+    return map;
   }
 
   @override
@@ -128,7 +162,6 @@ class _LoginPageState extends State<LoginPage> {
                                     child: const Text('Iniciar sesión', style: TextStyle(fontSize: 16)),
                                   ),
                                 ),
-
                           const SizedBox(height: 16),
                           Center(
                             child: TextButton(
