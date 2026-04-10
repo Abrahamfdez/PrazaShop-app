@@ -45,9 +45,12 @@ class _LoginPageState extends State<LoginPage> {
       String info = _emailCtl.text;
       if (userId != null) {
         try {
-          final usuario = await UsuarioService(widget.api).getById(userId);
+          print('Fetching user details for ID: $userId');
+          final usuario = await UsuarioService(widget.api).getById(userId).timeout( const Duration(seconds: 20));
+          print(  'User details: ID=${usuario.id}, Name=${usuario.nome}, Type=${usuario.tipoUsuario}');
           info = 'Tipo usuario: ${usuario.tipoUsuario} - ${usuario.nome}';
         } catch (e) {
+          print(  'Failed to fetch user details: $e');
           info = 'Usuario ID $userId (no se pudo obtener detalles)';
         }
       }

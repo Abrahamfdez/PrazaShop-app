@@ -19,8 +19,9 @@ class UsuarioService {
 
   Future<Usuario> getById(int id) async {
     final uri = Uri.parse('${api.baseUrl}/api/usuarios/$id');
-    final res = await http.get(uri, headers: api.headers()).timeout(const Duration(seconds: 20));
+    final res = await http.get(uri, headers: api.headers(jsonBody: false)).timeout(const Duration(seconds: 20));
     if (res.statusCode == 200) return Usuario.fromJson(json.decode(res.body));
+    print(  'Get usuario failed: ${res.statusCode} ${res.body}');
     throw Exception('Get usuario failed: ${res.statusCode} ${res.body}');
   }
 

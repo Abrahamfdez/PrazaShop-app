@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.prazashop.model.entity.Usuario;
 import org.example.prazashop.repository.UsuarioRepository;
 import org.springframework.context.annotation.Bean;
+import static org.springframework.security.config.Customizer.withDefaults;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -95,7 +96,8 @@ public class SecurityConfig {
                                                    DaoAuthenticationProvider authProvider,
                                                    JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
+            .cors(withDefaults())
+            .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
