@@ -1,10 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
-import '../services/usuario_service.dart';
-import '../models/usuario.dart';
+import '../utils/auth_utils.dart';
+import 'register_page.dart';
 
 
+/// Página de inicio de sesión que usa un `ApiService` para autenticar.
 class LoginPage extends StatefulWidget {
   final ApiService api;
   const LoginPage({super.key, required this.api});
@@ -13,6 +13,8 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
+/// Estado de `LoginPage` que gestiona el formulario, controladores y lógica
+/// de envío (login).
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtl = TextEditingController();
@@ -21,42 +23,35 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
+    // Libera los controladores para evitar fugas de memoria.
     _emailCtl.dispose();
     _passCtl.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
+    // Valida el formulario y realiza el login usando `AuthUtils`.
+    // Gestiona el estado de carga y la navegación tras el login.
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
     try {
-      final auth = await widget.api.login(_emailCtl.text.trim(), _passCtl.text);
-      widget.api.setTokens(accessToken: auth.accessToken, refreshToken: auth.refreshToken);
-      // Intent: decode token to get user id (jti) and fetch user details
-      int? userId;
-      try {
-        final payload = _parseJwt(auth.accessToken);
-        final idVal = payload['jti'] ?? payload['id'];
-        if (idVal != null) userId = int.tryParse(idVal.toString());
-      } catch (_) {
-        userId = null;
-      }
-
-      String info = _emailCtl.text;
-      if (userId != null) {
-        try {
-          print('Fetching user details for ID: $userId');
-          final usuario = await UsuarioService(widget.api).getById(userId).timeout( const Duration(seconds: 20));
-          print(  'User details: ID=${usuario.id}, Name=${usuario.nome}, Type=${usuario.tipoUsuario}');
-          info = 'Tipo usuario: ${usuario.tipoUsuario} - ${usuario.nome}';
-        } catch (e) {
-          print(  'Failed to fetch user details: $e');
-          info = 'Usuario ID $userId (no se pudo obtener detalles)';
-        }
-      }
-
+      final role = await AuthUtils.performLoginAndGetInfo(widget.api, _emailCtl.text, _passCtl.text);
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => Scaffold(body: Center(child: Text('Login successful! $info')))));
+      String infoText;
+      switch (role) {
+        case UserRole.CLIENTE:
+          infoText = 'Cliente';
+          break;
+        case UserRole.NEGOCIO:
+          infoText = 'Negocio';
+          break;
+        case UserRole.ADMIN:
+          infoText = 'Admin';
+          break;
+        default:
+          infoText = 'Desconocido';
+      }
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => Scaffold(body: Center(child: Text('Login successful! $infoText')))));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error : $e')));
@@ -65,19 +60,10 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Map<String, dynamic> _parseJwt(String token) {
-    final parts = token.split('.');
-    if (parts.length != 3) throw Exception('Token inválido');
-    final payload = parts[1];
-    final normalized = base64Url.normalize(payload);
-    final decoded = utf8.decode(base64Url.decode(normalized));
-    final map = json.decode(decoded);
-    if (map is! Map<String, dynamic>) throw Exception('Payload inválido');
-    return map;
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Construye la interfaz de usuario de la pantalla de login.
+    // Contiene el formulario de email/contraseña y el botón de envío.
     final green = const Color(0xFF10A75A);
     return Scaffold(
       backgroundColor: Colors.white,
@@ -168,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                           const SizedBox(height: 16),
                           Center(
                             child: TextButton(
-                              onPressed: () {},
+                              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => RegisterPage(api: widget.api))),
                               child: Text('Non tes conta? Rexistrate', style: TextStyle(color: green)),
                             ),
                           )
