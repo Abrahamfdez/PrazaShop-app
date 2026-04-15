@@ -47,4 +47,20 @@ public interface ValoracionService {
      * @param id the id
      */
     void deleteById(Long id);
+
+    /**
+     * Busca valoraciones por id de negocio.
+     *
+     * @param negocioId id del negocio
+     * @return lista de valoraciones
+     */
+    List<ValoracionDto> findByNegocioId(Long negocioId);
+
+    /**
+     * Busca valoraciones por id de cliente.
+     *
+     * @param clienteId id del cliente
+     * @return lista de valoraciones
+     */
+    List<ValoracionDto> findByClienteId(Long clienteId);
 }

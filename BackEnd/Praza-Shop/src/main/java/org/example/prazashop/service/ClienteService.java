@@ -47,4 +47,12 @@ public interface ClienteService {
      * @param id the id
      */
     void deleteById(Long id);
+
+    /**
+     * Busca un cliente por el id de usuario asociado.
+     *
+     * @param usuarioId id del usuario
+     * @return cliente encontrado
+     */
+    Optional<ClienteDto> findByUsuarioId(Long usuarioId);
 }

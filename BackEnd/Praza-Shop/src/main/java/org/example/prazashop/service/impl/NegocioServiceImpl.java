@@ -66,6 +66,12 @@ public class NegocioServiceImpl implements NegocioService {
         negocioRepository.deleteById(id);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<NegocioDto> findByUsuarioId(Long usuarioId) {
+        return negocioRepository.findByUsuario_Id(usuarioId).map(this::toDto);
+    }
+
     private NegocioDto toDto(Negocio negocio) {
         return NegocioDto.builder()
                 .id(negocio.getIdNegocio())

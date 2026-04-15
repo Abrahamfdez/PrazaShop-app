@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
-import '../utils/auth_utils.dart';
-import 'register_page.dart';
+
 
 
 /// Página de inicio de sesión que usa un `ApiService` para autenticar.
@@ -19,7 +18,6 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtl = TextEditingController();
   final _passCtl = TextEditingController();
-  bool _loading = false;
 
   @override
   void dispose() {
@@ -29,40 +27,10 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  Future<void> _submit() async {
-    // Valida el formulario y realiza el login usando `AuthUtils`.
-    // Gestiona el estado de carga y la navegación tras el login.
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _loading = true);
-    try {
-      final role = await AuthUtils.performLoginAndGetInfo(widget.api, _emailCtl.text, _passCtl.text);
-      if (!mounted) return;
-      String infoText;
-      switch (role) {
-        case UserRole.CLIENTE:
-          infoText = 'Cliente';
-          break;
-        case UserRole.NEGOCIO:
-          infoText = 'Negocio';
-          break;
-        case UserRole.ADMIN:
-          infoText = 'Admin';
-          break;
-        default:
-          infoText = 'Desconocido';
-      }
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => Scaffold(body: Center(child: Text('Login successful! $infoText')))));
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error : $e')));
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
+  // Login logic removed from the screen; keep UI only.
 
   @override
   Widget build(BuildContext context) {
-    // Construye la interfaz de usuario de la pantalla de login.
     // Contiene el formulario de email/contraseña y el botón de envío.
     final green = const Color(0xFF10A75A);
     return Scaffold(
@@ -135,26 +103,28 @@ class _LoginPageState extends State<LoginPage> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: TextButton(
-                              onPressed: () {},
+                              onPressed: () => print("Navigate to forgot password page"), // Navigator.of(context).push(MaterialPageRoute(builder: (_) => ForgotPasswordPage(api: widget.api))),
                               child: Text('Esqueciches o contrasinal?', style: TextStyle(color: green)),
                             ),
                           ),
 
                           const SizedBox(height: 8),
-                          _loading
-                              ? const Center(child: CircularProgressIndicator())
-                              : SizedBox(
-                                  height: 52,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(backgroundColor: green, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                                    onPressed: _submit,
-                                    child: const Text('Iniciar sesión', style: TextStyle(fontSize: 16)),
-                                  ),
-                                ),
+                          SizedBox(
+                            height: 52,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(backgroundColor: green, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                              onPressed: () {
+                                print("Login button pressed"); // Placeholder para la lógica de login.
+                                print("Login button pressed"); // Placeholder para la lógica de login.
+                                // Actualmente no hay lógica en la pantalla para mantenerla limpia.
+                              },
+                              child: const Text('Iniciar sesión', style: TextStyle(fontSize: 16)),
+                            ),
+                          ),
                           const SizedBox(height: 16),
                           Center(
                             child: TextButton(
-                              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => RegisterPage(api: widget.api))),
+                              onPressed: () => print("Navigate to register page"), // Navigator.of(context).push(MaterialPageRoute(builder: (_) => RegisterPage(api: widget.api))),
                               child: Text('Non tes conta? Rexistrate', style: TextStyle(color: green)),
                             ),
                           )

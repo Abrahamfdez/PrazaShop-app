@@ -84,5 +84,17 @@ public class NegocioController {
         negocioService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
-}
 
+    /**
+     * Obtiene un negocio por el id de usuario asociado.
+     *
+     * @param usuarioId identificador del usuario
+     * @return negocio encontrado
+     */
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<NegocioDto> getNegocioByUsuarioId(@PathVariable Long usuarioId) {
+        return negocioService.findByUsuarioId(usuarioId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+}

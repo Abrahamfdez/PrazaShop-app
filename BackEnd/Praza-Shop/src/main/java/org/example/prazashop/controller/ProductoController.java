@@ -91,5 +91,15 @@ public class ProductoController {
         productoService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
-}
 
+    /**
+     * Obtiene todos los productos de un negocio por su ID.
+     * @param negocioId identificador del negocio
+     * @return lista de productos del negocio
+     */
+    @GetMapping("/negocio/{negocioId}")
+    public ResponseEntity<List<ProductoDto>> getProductosByNegocio(@PathVariable Long negocioId) {
+        List<ProductoDto> productos = productoService.findByNegocioId(negocioId);
+        return ResponseEntity.ok(productos);
+    }
+}

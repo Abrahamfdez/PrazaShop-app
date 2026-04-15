@@ -3,6 +3,17 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/auth_response.dart';
 
+/// Excepción lanzada cuando la API responde con un código distinto de 2xx.
+class ApiException implements Exception {
+  final int statusCode;
+  final String body;
+  final String? message;
+  ApiException(this.statusCode, this.body, [this.message]);
+
+  @override
+  String toString() => 'ApiException: $statusCode ${message ?? body}';
+}
+
 class ApiService {
   final String baseUrl;
   String? _accessToken;
@@ -35,7 +46,15 @@ class ApiService {
         setTokens(accessToken: auth.accessToken, refreshToken: auth.refreshToken);
         return auth;
       }
-      throw Exception('Register failed: ${res.statusCode} ${res.body}');
+      // Intentar parsear el cuerpo de error JSON para proporcionar información útil
+      String? parsedMessage;
+      try {
+        final map = json.decode(res.body);
+        if (map is Map && map['message'] != null) parsedMessage = map['message'].toString();
+      } catch (_) {
+        parsedMessage = null;
+      }
+      throw ApiException(res.statusCode, res.body, parsedMessage);
     } on SocketException catch (e) {
       throw Exception('Network error (register): ${e.message}');
     } catch (e) {

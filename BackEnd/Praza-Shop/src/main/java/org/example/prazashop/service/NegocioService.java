@@ -47,4 +47,12 @@ public interface NegocioService {
      * @param id the id
      */
     void deleteById(Long id);
+
+    /**
+     * Busca un negocio por el id de usuario asociado.
+     *
+     * @param usuarioId id del usuario
+     * @return negocio encontrado
+     */
+    Optional<NegocioDto> findByUsuarioId(Long usuarioId);
 }

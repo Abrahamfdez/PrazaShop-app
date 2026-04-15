@@ -20,34 +20,41 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * The type Auth service.
+ * Servicio encargado de la autenticación y gestión de tokens JWT.
+ * Incluye registro, login y refresh de tokens.
  */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+    // Repositorio para gestionar los tokens en la base de datos
     private final TokenRepository tokenRepository;
+    // Codificador de contraseñas para almacenar contraseñas seguras
     private final PasswordEncoder passwordEncoder;
+    // Repositorio de usuarios para acceder a los datos de usuario
     private final UsuarioRepository usuarioRepository;
+    // Servicio para generar y validar JWT
     private final JwtService JwtService;
 
     /**
-     * Register token response.
-     *
-     * @param registerRequest the register request
-     * @return the token response
+     * Registra un nuevo usuario y genera tokens de acceso y refresh.
+     * @param registerRequest datos del usuario a registrar
+     * @return respuesta con access y refresh token
      */
     @Transactional
     public TokenResponse register(RegisterRequest registerRequest) {
+        // Normalizamos el email (sin espacios y en minúsculas)
         String email = registerRequest.getEmail() != null ? registerRequest.getEmail().trim().toLowerCase() : null;
         if (email == null || email.isBlank()) {
+            // Si el email es nulo o vacío, lanzamos excepción 400
             throw new BadRequestException("Email requerido");
         }
 
-        // Validación previa: si ya existe, responder inmediatamente
+        // Si ya existe un usuario con ese email, lanzamos excepción 409
         if (usuarioRepository.existsByEmail(email)) {
             throw new ConflictException("Email ya registrado");
         }
 
+        // Creamos el usuario con los datos recibidos y la contraseña codificada
         var user = Usuario.builder()
                 .nome(registerRequest.getNome())
                 .contrasinal(passwordEncoder.encode(registerRequest.getContrasinal()))
@@ -57,40 +64,43 @@ public class AuthService {
                 .build();
 
         try {
+            // Guardamos el usuario en la base de datos
             var guardado = usuarioRepository.save(user);
 
+            // Generamos los tokens JWT
             var jwtToken = JwtService.generateToken(guardado);
             var refreshToken = JwtService.generateRefreshToken(guardado);
 
+            // Guardamos los tokens en la base de datos
             saveUserToken(guardado, jwtToken, Token.TipoToken.ACCESS);
             saveUserToken(guardado, refreshToken, Token.TipoToken.REFRESH);
 
+            // Devolvemos los tokens al cliente
             return TokenResponse.builder()
                     .accessToken(jwtToken)
                     .refreshToken(refreshToken)
                     .build();
 
         } catch (DataIntegrityViolationException ex) {
-            // Retornar Conflict para indicar que ya existe un recurso con ese identificador.
+            // Si hay un error de integridad (email duplicado), lanzamos excepción 409
             throw new ConflictException("Email ya registrado");
         }
     }
 
     /**
-     * Login token response.
-     *
-     * @param loginRequest the login request
-     * @return the token response
+     * Autentica al usuario y genera nuevos tokens, revocando los anteriores.
+     * @param loginRequest datos de login (email y contraseña)
+     * @return respuesta con access y refresh token
      */
     public TokenResponse login(LoginRequest loginRequest) {
-        // Buscamos el correo en la BD o Lanzamos Excepcion
+        // Buscamos el usuario por email o lanzamos excepción si no existe
         var user = usuarioRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new BadRequestException("Usuario incorrecto"));
-        // Comporbamos si hay mach enj las contraseñas
+        // Comprobamos si la contraseña es correcta
         if (!passwordEncoder.matches(loginRequest.getContrasinal(), user.getContrasinal())) {
             throw new BadRequestException("Contraseña  incorrecta");
         }
-        // Revocar todos los access tokens anteriores del usuario antes de guardar el nuevo
+        // Revocamos todos los access tokens anteriores del usuario
         java.util.List<Token> tokens = tokenRepository.findAllByUsuarioId(user.getId());
         for (Token t : tokens) {
             if (t.getTipoToken() == Token.TipoToken.ACCESS && !t.isRevocado() && !t.isExpirado()) {
@@ -99,17 +109,24 @@ public class AuthService {
                 tokenRepository.save(t);
             }
         }
-        // Generamos tokens y los guardamos
+        // Generamos nuevos tokens y los guardamos
         var jwtToken = JwtService.generateToken(user);
         var refreshToken = JwtService.generateRefreshToken(user);
         saveUserToken(user, jwtToken, Token.TipoToken.ACCESS);
         saveUserToken(user, refreshToken, Token.TipoToken.REFRESH);
+        // Devolvemos los tokens al cliente
         return TokenResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .build();
     }
 
+    /**
+     * Guarda un token asociado a un usuario en la base de datos.
+     * @param usuario usuario al que pertenece el token
+     * @param jwtToken valor del token
+     * @param tipo tipo de token (ACCESS o REFRESH)
+     */
     private void saveUserToken(Usuario usuario, String jwtToken,Token.TipoToken tipo) {
         var token = Token.builder()
                 .usuario(usuario)
@@ -122,16 +139,15 @@ public class AuthService {
     }
 
     /**
-     * Refresh token token response.
-     *
-     * @param rawRefreshToken the raw refresh token
-     * @return the token response
+     * Refresca el access token usando un refresh token válido.
+     * @param rawRefreshToken refresh token recibido (puede venir con 'Bearer ')
+     * @return respuesta con nuevo access token y el mismo refresh token
      */
     public TokenResponse refreshToken(String rawRefreshToken) {
-        // Se acepta como "Bearer <token>" o token solo
+        // Se acepta como "Bearer <token>" o solo el token
         String refreshToken = rawRefreshToken.startsWith("Bearer ") ? rawRefreshToken.substring(7) : rawRefreshToken;
 
-        // extrae  (email)
+        // Extraemos el email del token
         String email;
         try {
             email = JwtService.extractUsername(refreshToken);
@@ -139,10 +155,11 @@ public class AuthService {
             throw new BadRequestException("Refresh token inválido");
         }
 
+        // Buscamos el usuario por email
         var user = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
-        // comprobar que el refresh token existe en BD y no esté revocado/expirado
+        // Comprobamos que el refresh token existe y no está revocado/expirado
         var tokenEntityOpt = tokenRepository.findByToken(refreshToken);
         if (tokenEntityOpt.isEmpty()) {
             throw new BadRequestException("Refresh token no encontrado");
@@ -152,8 +169,7 @@ public class AuthService {
             throw new BadRequestException("Refresh token inválido o revocado");
         }
 
-        // validar firma y expiración con JwtService
-        // construimos UserDetails ligero para validar username y expiración
+        // Validamos la firma y expiración del token
         var userDetails = new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getContrasinal(),
@@ -164,11 +180,10 @@ public class AuthService {
             throw new BadRequestException("Refresh token no válido o expirado");
         }
 
-        // generar nuevo access token (no regeneramos refresh por defecto)
+        // Generamos un nuevo access token
         var newAccessToken = JwtService.generateToken(user);
 
-        // guardar nuevo access token y  revocar tokens antiguos (ejemplo: no revocamos aquí)
-
+        // Revocamos los access tokens anteriores
         List<Token> tokens = tokenRepository.findAllByUsuarioId(user.getId());
         for (Token t : tokens) {
             if (t.getTipoToken() == Token.TipoToken.ACCESS && !t.isRevocado() && !t.isExpirado()) {
@@ -177,8 +192,10 @@ public class AuthService {
                 tokenRepository.save(t);
             }
         }
+        // Guardamos el nuevo access token
         saveUserToken(user, newAccessToken, Token.TipoToken.ACCESS);
 
+        // Devolvemos el nuevo access token y el mismo refresh token
         return TokenResponse.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(refreshToken)

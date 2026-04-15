@@ -66,6 +66,12 @@ public class ClienteServiceImpl implements ClienteService {
         clienteRepository.deleteById(id);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<ClienteDto> findByUsuarioId(Long usuarioId) {
+        return clienteRepository.findByUsuario_Id(usuarioId).map(this::toDto);
+    }
+
     private ClienteDto toDto(Cliente cliente) {
         return ClienteDto.builder()
                 .id(cliente.getIdCliente())

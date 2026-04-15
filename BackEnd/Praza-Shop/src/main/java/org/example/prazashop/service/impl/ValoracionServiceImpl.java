@@ -68,6 +68,22 @@ public class ValoracionServiceImpl implements ValoracionService {
         valoracionRepository.deleteById(id);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<ValoracionDto> findByNegocioId(Long negocioId) {
+        return valoracionRepository.findByNegocio_Id(negocioId).stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ValoracionDto> findByClienteId(Long clienteId) {
+        return valoracionRepository.findByCliente_Id(clienteId).stream()
+                .map(this::toDto)
+                .toList();
+    }
+
     private ValoracionDto toDto(Valoracion valoracion) {
         return ValoracionDto.builder()
                 .id(valoracion.getIdValoracion())

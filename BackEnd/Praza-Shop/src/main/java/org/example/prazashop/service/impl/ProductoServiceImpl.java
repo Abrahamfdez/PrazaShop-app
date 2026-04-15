@@ -66,6 +66,21 @@ public class ProductoServiceImpl implements ProductoService {
         productoRepository.deleteById(id);
     }
 
+    /**
+     * Devuelve todos los productos de un negocio por su ID.
+     *
+     * @param negocioId identificador del negocio
+     * @return lista de productos del negocio
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductoDto> findByNegocioId(Long negocioId) {
+        return productoRepository.findAll().stream()
+                .filter(p -> p.getNegocio() != null && negocioId.equals(p.getNegocio().getIdNegocio()))
+                .map(this::toDto)
+                .toList();
+    }
+
     private ProductoDto toDto(Producto producto) {
         return ProductoDto.builder()
                 .id(producto.getIdProducto())

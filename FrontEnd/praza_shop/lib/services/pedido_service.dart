@@ -1,40 +1,40 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'api_service.dart';
-import '../models/pedido.dart';
+import '../models/pedido_dto.dart';
 
 class PedidoService {
   final ApiService api;
   PedidoService(this.api);
 
-  Future<List<Pedido>> getAll() async {
+  Future<List<PedidoDto>> getAll() async {
     final uri = Uri.parse('${api.baseUrl}/api/pedidos');
     final res = await http.get(uri, headers: api.headers(jsonBody: false));
     if (res.statusCode == 200) {
       final data = json.decode(res.body) as List<dynamic>;
-      return data.map((e) => Pedido.fromJson(e as Map<String, dynamic>)).toList();
+      return data.map((e) => PedidoDto.fromJson(e as Map<String, dynamic>)).toList();
     }
     throw Exception('Get pedidos failed: ${res.statusCode} ${res.body}');
   }
 
-  Future<Pedido> getById(int id) async {
+  Future<PedidoDto> getById(int id) async {
     final uri = Uri.parse('${api.baseUrl}/api/pedidos/$id');
     final res = await http.get(uri, headers: api.headers(jsonBody: false));
-    if (res.statusCode == 200) return Pedido.fromJson(json.decode(res.body));
+    if (res.statusCode == 200) return PedidoDto.fromJson(json.decode(res.body));
     throw Exception('Get pedido failed: ${res.statusCode} ${res.body}');
   }
 
-  Future<Pedido> create(Pedido p) async {
+  Future<PedidoDto> create(PedidoDto p) async {
     final uri = Uri.parse('${api.baseUrl}/api/pedidos');
     final res = await http.post(uri, headers: api.headers(), body: json.encode(p.toJson()));
-    if (res.statusCode == 200 || res.statusCode == 201) return Pedido.fromJson(json.decode(res.body));
+    if (res.statusCode == 200 || res.statusCode == 201) return PedidoDto.fromJson(json.decode(res.body));
     throw Exception('Create pedido failed: ${res.statusCode} ${res.body}');
   }
 
-  Future<Pedido> update(int id, Pedido p) async {
+  Future<PedidoDto> update(int id, PedidoDto p) async {
     final uri = Uri.parse('${api.baseUrl}/api/pedidos/$id');
     final res = await http.put(uri, headers: api.headers(), body: json.encode(p.toJson()));
-    if (res.statusCode == 200) return Pedido.fromJson(json.decode(res.body));
+    if (res.statusCode == 200) return PedidoDto.fromJson(json.decode(res.body));
     throw Exception('Update pedido failed: ${res.statusCode} ${res.body}');
   }
 

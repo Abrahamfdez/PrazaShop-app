@@ -84,5 +84,17 @@ public class ClienteController {
         clienteService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
-}
 
+    /**
+     * Obtiene un cliente por el id de usuario asociado.
+     *
+     * @param usuarioId identificador del usuario
+     * @return cliente encontrado
+     */
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<ClienteDto> getClienteByUsuarioId(@PathVariable Long usuarioId) {
+        return clienteService.findByUsuarioId(usuarioId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+}

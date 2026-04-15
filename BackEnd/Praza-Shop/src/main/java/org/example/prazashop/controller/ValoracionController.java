@@ -84,5 +84,28 @@ public class ValoracionController {
         valoracionService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
-}
 
+    /**
+     * Obtiene todas las valoraciones de un negocio por su id.
+     *
+     * @param negocioId identificador del negocio
+     * @return lista de valoraciones
+     */
+    @GetMapping("/negocio/{negocioId}")
+    public ResponseEntity<List<ValoracionDto>> getValoracionesByNegocioId(@PathVariable Long negocioId) {
+        List<ValoracionDto> valoraciones = valoracionService.findByNegocioId(negocioId);
+        return ResponseEntity.ok(valoraciones);
+    }
+
+    /**
+     * Obtiene todas las valoraciones de un cliente por su id.
+     *
+     * @param clienteId identificador del cliente
+     * @return lista de valoraciones
+     */
+    @GetMapping("/cliente/{clienteId}")
+    public ResponseEntity<List<ValoracionDto>> getValoracionesByClienteId(@PathVariable Long clienteId) {
+        List<ValoracionDto> valoraciones = valoracionService.findByClienteId(clienteId);
+        return ResponseEntity.ok(valoraciones);
+    }
+}

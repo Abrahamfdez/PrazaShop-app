@@ -47,4 +47,11 @@ public interface ProductoService {
      * @param id the id
      */
     void deleteById(Long id);
+
+    /**
+     * Devuelve todos los productos de un negocio por su ID.
+     * @param negocioId identificador del negocio
+     * @return lista de productos del negocio
+     */
+    List<ProductoDto> findByNegocioId(Long negocioId);
 }
