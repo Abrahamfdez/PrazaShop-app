@@ -41,9 +41,8 @@ public class ValoracionController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<ValoracionDto> getValoracionById(@PathVariable Long id) {
-        return valoracionService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        ValoracionDto dto = valoracionService.findById(id);
+        return ResponseEntity.ok(dto);
     }
 
     /**

@@ -15,7 +15,7 @@ public interface ValoracionRepository extends JpaRepository<Valoracion, Long> {
      * @param negocioId id del negocio
      * @return lista de valoraciones
      */
-    List<Valoracion> findByNegocio_Id(Long negocioId);
+    List<Valoracion> findByNegocio_IdNegocio(Long negocioId);
 
     /**
      * Busca valoraciones por id de cliente.
@@ -23,5 +23,5 @@ public interface ValoracionRepository extends JpaRepository<Valoracion, Long> {
      * @param clienteId id del cliente
      * @return lista de valoraciones
      */
-    List<Valoracion> findByCliente_Id(Long clienteId);
+    List<Valoracion> findByCliente_IdCliente(Long clienteId);
 }

@@ -1,10 +1,12 @@
+import 'package:praza_shop/models/role.dart';
+
 class UsuarioDto {
   final int? id;
   final String? nome;
   final String? email;
   final String? contrasinal;
   final String? telefono;
-  final String? tipoUsuario;
+  final Role? tipoUsuario;
 
   UsuarioDto({this.id, this.nome, this.email, this.contrasinal, this.telefono, this.tipoUsuario});
 
@@ -14,7 +16,7 @@ class UsuarioDto {
         email: json['email'],
         contrasinal: json['contrasinal'],
         telefono: json['telefono'],
-        tipoUsuario: json['tipoUsuario']?.toString(),
+        tipoUsuario: json['tipoUsuario'] != null ? RoleExt.fromString(json['tipoUsuario'].toString()) : null,
       );
 
   Map<String, dynamic> toJson() => {
@@ -23,6 +25,6 @@ class UsuarioDto {
         if (email != null) 'email': email,
         if (contrasinal != null) 'contrasinal': contrasinal,
         if (telefono != null) 'telefono': telefono,
-        if (tipoUsuario != null) 'tipoUsuario': tipoUsuario,
+        if (tipoUsuario != null) 'tipoUsuario': tipoUsuario.toString().split('.').last,
       };
 }

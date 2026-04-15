@@ -1,6 +1,7 @@
 package org.example.prazashop.service.impl;
 
 import org.example.prazashop.exception.BadRequestException;
+import org.example.prazashop.exception.NoContentException;
 import org.example.prazashop.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.prazashop.model.dto.UsuarioDto;
@@ -34,8 +35,10 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<UsuarioDto> findById(Long id) {
-        return usuarioRepository.findById(id).map(this::toDto);
+    public UsuarioDto findById(Long id) {
+        return usuarioRepository.findById(id)
+                .map(this::toDto)
+                .orElseThrow(() -> new NoContentException("Usuario no encontrado"));
     }
 
     @Override

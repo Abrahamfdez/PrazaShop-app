@@ -1,9 +1,9 @@
 package org.example.prazashop.service;
 
+import org.example.prazashop.exception.NoContentException;
 import org.example.prazashop.model.dto.NegocioDto;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Contrato de operaciones para la gestión de negocios.
@@ -17,12 +17,13 @@ public interface NegocioService {
     List<NegocioDto> findAll();
 
     /**
-     * Find by id optional.
+     * Busca un negocio por su id. Lanza NoContentException si no se encuentra.
      *
      * @param id the id
-     * @return the optional
+     * @return negocio encontrado
+     * @throws NoContentException si no se encuentra el negocio
      */
-    Optional<NegocioDto> findById(Long id);
+    NegocioDto findById(Long id);
 
     /**
      * Create negocio dto.
@@ -49,10 +50,11 @@ public interface NegocioService {
     void deleteById(Long id);
 
     /**
-     * Busca un negocio por el id de usuario asociado.
+     * Busca un negocio por el id de usuario asociado. Lanza NoContentException si no se encuentra.
      *
      * @param usuarioId id del usuario
      * @return negocio encontrado
+     * @throws NoContentException si no se encuentra el negocio
      */
-    Optional<NegocioDto> findByUsuarioId(Long usuarioId);
+    NegocioDto findByUsuarioId(Long usuarioId);
 }

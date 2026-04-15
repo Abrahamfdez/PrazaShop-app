@@ -1,6 +1,7 @@
 package org.example.prazashop.service.impl;
 
 import org.example.prazashop.exception.BadRequestException;
+import org.example.prazashop.exception.NoContentException;
 import org.example.prazashop.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.prazashop.model.dto.ValoracionDto;
@@ -39,8 +40,10 @@ public class ValoracionServiceImpl implements ValoracionService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<ValoracionDto> findById(Long id) {
-        return valoracionRepository.findById(id).map(this::toDto);
+    public ValoracionDto findById(Long id) {
+        return valoracionRepository.findById(id)
+                .map(this::toDto)
+                .orElseThrow(() -> new NoContentException("Valoración no encontrada"));
     }
 
     @Override
@@ -71,7 +74,7 @@ public class ValoracionServiceImpl implements ValoracionService {
     @Override
     @Transactional(readOnly = true)
     public List<ValoracionDto> findByNegocioId(Long negocioId) {
-        return valoracionRepository.findByNegocio_Id(negocioId).stream()
+        return valoracionRepository.findByNegocio_IdNegocio(negocioId).stream()
                 .map(this::toDto)
                 .toList();
     }
@@ -79,7 +82,7 @@ public class ValoracionServiceImpl implements ValoracionService {
     @Override
     @Transactional(readOnly = true)
     public List<ValoracionDto> findByClienteId(Long clienteId) {
-        return valoracionRepository.findByCliente_Id(clienteId).stream()
+        return valoracionRepository.findByCliente_IdCliente(clienteId).stream()
                 .map(this::toDto)
                 .toList();
     }

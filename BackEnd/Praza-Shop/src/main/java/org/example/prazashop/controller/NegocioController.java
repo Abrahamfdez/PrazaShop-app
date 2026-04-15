@@ -41,9 +41,8 @@ public class NegocioController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<NegocioDto> getNegocioById(@PathVariable Long id) {
-        return negocioService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        NegocioDto dto = negocioService.findById(id);
+        return ResponseEntity.ok(dto);
     }
 
     /**
@@ -93,8 +92,7 @@ public class NegocioController {
      */
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<NegocioDto> getNegocioByUsuarioId(@PathVariable Long usuarioId) {
-        return negocioService.findByUsuarioId(usuarioId)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        NegocioDto dto = negocioService.findByUsuarioId(usuarioId);
+        return ResponseEntity.ok(dto);
     }
 }

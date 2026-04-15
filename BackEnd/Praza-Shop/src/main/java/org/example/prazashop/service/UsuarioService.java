@@ -1,9 +1,9 @@
 package org.example.prazashop.service;
 
+import org.example.prazashop.exception.NoContentException;
 import org.example.prazashop.model.dto.UsuarioDto;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * API de servicios alrededor de usuarios.
@@ -17,12 +17,13 @@ public interface UsuarioService {
     List<UsuarioDto> findAll();
 
     /**
-     * Find by id optional.
+     * Busca un usuario por su id. Lanza NoContentException si no se encuentra.
      *
      * @param id the id
-     * @return the optional
+     * @return el usuario encontrado
+     * @throws NoContentException si no se encuentra el usuario
      */
-    Optional<UsuarioDto> findById(Long id);
+    UsuarioDto findById(Long id);
 
     /**
      * Create usuario dto.

@@ -22,7 +22,7 @@ public interface ClienteService {
      * @param id the id
      * @return the optional
      */
-    Optional<ClienteDto> findById(Long id);
+    ClienteDto findById(Long id);
 
     /**
      * Create cliente dto.

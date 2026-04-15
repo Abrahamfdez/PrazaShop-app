@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:praza_shop/models/role.dart';
+import 'package:praza_shop/models/usuario_dto.dart';
+import 'package:praza_shop/screens/register_page.dart';
+import 'package:praza_shop/utils/api_utils.dart';
 import '../services/api_service.dart';
 
 
@@ -18,6 +22,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailCtl = TextEditingController();
   final _passCtl = TextEditingController();
+  
 
   @override
   void dispose() {
@@ -25,6 +30,39 @@ class _LoginPageState extends State<LoginPage> {
     _emailCtl.dispose();
     _passCtl.dispose();
     super.dispose();
+  }
+  Future<void> _performLogin() async {
+    if (_formKey.currentState!.validate()) {
+      final email = _emailCtl.text.trim();
+      final password = _passCtl.text;
+      try {
+        // Aquí se llamaría a AuthUtils.performLoginAndGetInfo para realizar el login
+        // y obtener el rol del usuario, luego navegar a la pantalla correspondiente.
+        var response=await widget.api.login(email, password);
+        var usuario=await ApiUtils.getUserFromToken(widget.api, response.accessToken);
+        switch (usuario.tipoUsuario) {
+          case Role.CLIENTE:
+            print("Navigate to cliente home page");
+             // Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => ClienteHomePage(api: widget.api, usuario: usuario)));
+             break;
+            case Role.NEGOCIO:
+            print("Navigate to negocio home page");
+             // Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => NegocioHomePage(api: widget.api, usuario: usuario)));
+             break; 
+          case Role.ADMIN:
+            print("Navigate to admin dashboard");
+             // Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => AdminDashboard(api: widget.api, usuario: usuario)));
+            break;
+          default:
+            print("Navigate to generic home page");
+             // Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomePage(api: widget.api, usuario: usuario)));
+        }
+      
+      } catch (e) {
+        // Mostrar un error genérico en caso de fallo.
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al iniciar sesión: ${e.toString()}')));
+      }
+    }
   }
 
   // Login logic removed from the screen; keep UI only.
@@ -114,9 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(backgroundColor: green, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                               onPressed: () {
-                                print("Login button pressed"); // Placeholder para la lógica de login.
-                                print("Login button pressed"); // Placeholder para la lógica de login.
-                                // Actualmente no hay lógica en la pantalla para mantenerla limpia.
+                                _performLogin();
                               },
                               child: const Text('Iniciar sesión', style: TextStyle(fontSize: 16)),
                             ),
@@ -124,7 +160,7 @@ class _LoginPageState extends State<LoginPage> {
                           const SizedBox(height: 16),
                           Center(
                             child: TextButton(
-                              onPressed: () => print("Navigate to register page"), // Navigator.of(context).push(MaterialPageRoute(builder: (_) => RegisterPage(api: widget.api))),
+                              onPressed: () =>  Navigator.of(context).push(MaterialPageRoute(builder: (_) => RegisterPage(api: widget.api))),
                               child: Text('Non tes conta? Rexistrate', style: TextStyle(color: green)),
                             ),
                           )

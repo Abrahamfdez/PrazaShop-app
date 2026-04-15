@@ -41,9 +41,8 @@ public class PedidoController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<PedidoDto> getPedidoById(@PathVariable Long id) {
-        return pedidoService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        PedidoDto dto = pedidoService.findById(id);
+        return ResponseEntity.ok(dto);
     }
 
     /**
@@ -84,6 +83,28 @@ public class PedidoController {
         pedidoService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * Obtiene todos los pedidos de un cliente por su id.
+     *
+     * @param clienteId identificador del cliente
+     * @return lista de pedidos
+     */
+    @GetMapping("/cliente/{clienteId}")
+    public ResponseEntity<List<PedidoDto>> getPedidosByClienteId(@PathVariable Long clienteId) {
+        List<PedidoDto> pedidos = pedidoService.findByClienteId(clienteId);
+        return ResponseEntity.ok(pedidos);
+    }
+
+    /**
+     * Obtiene todos los pedidos de un negocio por su id.
+     *
+     * @param negocioId identificador del negocio
+     * @return lista de pedidos
+     */
+    @GetMapping("/negocio/{negocioId}")
+    public ResponseEntity<List<PedidoDto>> getPedidosByNegocioId(@PathVariable Long negocioId) {
+        List<PedidoDto> pedidos = pedidoService.findByNegocioId(negocioId);
+        return ResponseEntity.ok(pedidos);
+    }
 }
-
-

@@ -1,6 +1,7 @@
 package org.example.prazashop.service.impl;
 
 import org.example.prazashop.exception.BadRequestException;
+import org.example.prazashop.exception.NoContentException;
 import org.example.prazashop.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.prazashop.model.dto.NegocioDto;
@@ -14,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * The type Negocio service.
@@ -37,8 +37,10 @@ public class NegocioServiceImpl implements NegocioService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<NegocioDto> findById(Long id) {
-        return negocioRepository.findById(id).map(this::toDto);
+    public NegocioDto findById(Long id) {
+        return negocioRepository.findById(id)
+                .map(this::toDto)
+                .orElseThrow(() -> new NoContentException("Negocio no encontrado"));
     }
 
     @Override
@@ -68,8 +70,10 @@ public class NegocioServiceImpl implements NegocioService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<NegocioDto> findByUsuarioId(Long usuarioId) {
-        return negocioRepository.findByUsuario_Id(usuarioId).map(this::toDto);
+    public NegocioDto findByUsuarioId(Long usuarioId) {
+        return negocioRepository.findByUsuario_Id(usuarioId)
+                .map(this::toDto)
+                .orElseThrow(() -> new NoContentException("Negocio no encontrado para el usuario"));
     }
 
     private NegocioDto toDto(Negocio negocio) {

@@ -3,7 +3,6 @@ package org.example.prazashop.service;
 import org.example.prazashop.model.dto.ValoracionDto;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Define las operaciones de negocio para valoraciones.
@@ -17,12 +16,13 @@ public interface ValoracionService {
     List<ValoracionDto> findAll();
 
     /**
-     * Find by id optional.
+     * Busca una valoración por su id. Lanza NoContentException si no se encuentra.
      *
      * @param id the id
-     * @return the optional
+     * @return valoración encontrada
+     * @throws NoContentException si no se encuentra la valoración
      */
-    Optional<ValoracionDto> findById(Long id);
+    ValoracionDto findById(Long id);
 
     /**
      * Create valoracion dto.

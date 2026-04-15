@@ -3,7 +3,6 @@ package org.example.prazashop.service;
 import org.example.prazashop.model.dto.ProductoDto;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Interfaz para la lógica de negocio de productos.
@@ -17,12 +16,13 @@ public interface ProductoService {
     List<ProductoDto> findAll();
 
     /**
-     * Find by id optional.
+     * Busca un producto por su id. Lanza NoContentException si no se encuentra.
      *
      * @param id the id
-     * @return the optional
+     * @return el producto encontrado
+     * @throws NoContentException si no se encuentra el producto
      */
-    Optional<ProductoDto> findById(Long id);
+    ProductoDto findById(Long id);
 
     /**
      * Create producto dto.

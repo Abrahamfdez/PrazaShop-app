@@ -1,6 +1,7 @@
 package org.example.prazashop.service.impl;
 
 import org.example.prazashop.exception.BadRequestException;
+import org.example.prazashop.exception.NoContentException;
 import org.example.prazashop.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.prazashop.model.dto.ClienteDto;
@@ -37,8 +38,11 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<ClienteDto> findById(Long id) {
-        return clienteRepository.findById(id).map(this::toDto);
+    public ClienteDto findById(Long id) {
+        return clienteRepository
+                .findById(id)
+                .map(this::toDto)
+                .orElseThrow(() -> new NoContentException("Cliente no encontrado"));
     }
 
     @Override

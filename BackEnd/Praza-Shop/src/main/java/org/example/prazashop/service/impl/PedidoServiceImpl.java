@@ -1,6 +1,7 @@
 package org.example.prazashop.service.impl;
 
 import org.example.prazashop.exception.BadRequestException;
+import org.example.prazashop.exception.NoContentException;
 import org.example.prazashop.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.prazashop.model.dto.PedidoDto;
@@ -40,8 +41,10 @@ public class PedidoServiceImpl implements PedidoService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<PedidoDto> findById(Long id) {
-        return pedidoRepository.findById(id).map(this::toDto);
+    public PedidoDto findById(Long id) {
+        return pedidoRepository.findById(id)
+                .map(this::toDto)
+                .orElseThrow(() -> new NoContentException("Pedido no encontrado"));
     }
 
     @Override
@@ -67,6 +70,22 @@ public class PedidoServiceImpl implements PedidoService {
             throw new NotFoundException("Pedido no encontrado con id " + id);
         }
         pedidoRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PedidoDto> findByClienteId(Long clienteId) {
+        return pedidoRepository.findByCliente_IdCliente(clienteId).stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PedidoDto> findByNegocioId(Long negocioId) {
+        return pedidoRepository.findByNegocio_IdNegocio(negocioId).stream()
+                .map(this::toDto)
+                .toList();
     }
 
     private PedidoDto toDto(Pedido pedido) {

@@ -3,7 +3,6 @@ package org.example.prazashop.service;
 import org.example.prazashop.model.dto.PedidoDto;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Servicios de negocio relacionados con pedidos.
@@ -17,12 +16,13 @@ public interface PedidoService {
     List<PedidoDto> findAll();
 
     /**
-     * Find by id optional.
+     * Busca un pedido por su id. Lanza NoContentException si no se encuentra.
      *
      * @param id the id
-     * @return the optional
+     * @return pedido encontrado
+     * @throws NoContentException si no se encuentra el pedido
      */
-    Optional<PedidoDto> findById(Long id);
+    PedidoDto findById(Long id);
 
     /**
      * Create pedido dto.
@@ -47,4 +47,20 @@ public interface PedidoService {
      * @param id the id
      */
     void deleteById(Long id);
+
+    /**
+     * Busca pedidos por id de cliente.
+     *
+     * @param clienteId id del cliente
+     * @return lista de pedidos
+     */
+    List<PedidoDto> findByClienteId(Long clienteId);
+
+    /**
+     * Busca pedidos por id de negocio.
+     *
+     * @param negocioId id del negocio
+     * @return lista de pedidos
+     */
+    List<PedidoDto> findByNegocioId(Long negocioId);
 }
