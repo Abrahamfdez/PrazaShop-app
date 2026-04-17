@@ -87,6 +87,31 @@ public class ValoracionServiceImpl implements ValoracionService {
                 .toList();
     }
 
+    /**
+     * Obtiene la cantidad de valoraciones de un negocio.
+     *
+     * @param negocioId id del negocio
+     * @return cantidad de valoraciones
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Long getCountValoracionesByNegocioId(Long negocioId) {
+        return valoracionRepository.countByNegocioId(negocioId);
+    }
+
+    /**
+     * Obtiene la media de puntuación de un negocio.
+     *
+     * @param negocioId id del negocio
+     * @return media de puntuación
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Double getAveragePuntuacionByNegocioId(Long negocioId) {
+        Double average = valoracionRepository.getAveragePuntuacionByNegocioId(negocioId);
+        return average != null ? Math.round(average * 100.0) / 100.0 : 0.0;
+    }
+
     private ValoracionDto toDto(Valoracion valoracion) {
         return ValoracionDto.builder()
                 .id(valoracion.getIdValoracion())

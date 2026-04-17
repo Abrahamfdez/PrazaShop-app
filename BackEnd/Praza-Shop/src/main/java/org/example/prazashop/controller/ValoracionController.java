@@ -1,6 +1,7 @@
 package org.example.prazashop.controller;
 
 import org.example.prazashop.model.dto.ValoracionDto;
+import org.example.prazashop.model.dto.ValoracionEstadisticasDto;
 import org.example.prazashop.service.ValoracionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -106,5 +107,29 @@ public class ValoracionController {
     public ResponseEntity<List<ValoracionDto>> getValoracionesByClienteId(@PathVariable Long clienteId) {
         List<ValoracionDto> valoraciones = valoracionService.findByClienteId(clienteId);
         return ResponseEntity.ok(valoraciones);
+    }
+
+    /**
+     * Obtiene las estadísticas completas de valoraciones de un negocio (cantidad y media).
+     *
+     * @param negocioId identificador del negocio
+     * @return estadísticas de valoraciones con cantidad y media de puntuación
+     */
+    @GetMapping("/negocio/{negocioId}/estadisticas")
+    public ResponseEntity<ValoracionEstadisticasDto> getEstadisticasValoracionesByNegocioId(@PathVariable Long negocioId) {
+        // Obtenemos la cantidad de valoraciones
+        Long cantidad = valoracionService.getCountValoracionesByNegocioId(negocioId);
+        
+        // Obtenemos la media de puntuación
+        Double media = valoracionService.getAveragePuntuacionByNegocioId(negocioId);
+        
+        // Construimos el DTO con toda la información
+        ValoracionEstadisticasDto estadisticas = ValoracionEstadisticasDto.builder()
+                .negocioId(negocioId)
+                .cantidadValoraciones(cantidad)
+                .mediaPuntuacion(media)
+                .build();
+        
+        return ResponseEntity.ok(estadisticas);
     }
 }

@@ -63,4 +63,20 @@ public interface ValoracionService {
      * @return lista de valoraciones
      */
     List<ValoracionDto> findByClienteId(Long clienteId);
+
+    /**
+     * Obtiene la cantidad de valoraciones de un negocio.
+     *
+     * @param negocioId id del negocio
+     * @return cantidad de valoraciones
+     */
+    Long getCountValoracionesByNegocioId(Long negocioId);
+
+    /**
+     * Obtiene la media de puntuación de un negocio.
+     *
+     * @param negocioId id del negocio
+     * @return media de puntuación
+     */
+    Double getAveragePuntuacionByNegocioId(Long negocioId);
 }
