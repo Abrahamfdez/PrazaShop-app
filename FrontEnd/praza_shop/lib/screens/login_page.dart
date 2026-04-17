@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:praza_shop/models/role.dart';
 import 'package:praza_shop/models/usuario_dto.dart';
 import 'package:praza_shop/screens/register_page.dart';
+import 'package:praza_shop/screens/cliente_home_page.dart';
 import 'package:praza_shop/utils/api_utils.dart';
 import '../services/api_service.dart';
 
@@ -38,13 +39,13 @@ class _LoginPageState extends State<LoginPage> {
       try {
         // Aquí se llamaría a AuthUtils.performLoginAndGetInfo para realizar el login
         // y obtener el rol del usuario, luego navegar a la pantalla correspondiente.
-        var response=await widget.api.login(email, password);
-        var usuario=await ApiUtils.getUserFromToken(widget.api, response.accessToken);
+        var token=await widget.api.login(email, password);
+        var usuario=await ApiUtils.getUserFromToken(widget.api, token.accessToken);
         switch (usuario.tipoUsuario) {
           case Role.CLIENTE:
             print("Navigate to cliente home page");
-             // Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => ClienteHomePage(api: widget.api, usuario: usuario)));
-             break;
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => ClienteHomePage(api: widget.api, usuario: usuario)));
+            break;
             case Role.NEGOCIO:
             print("Navigate to negocio home page");
              // Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => NegocioHomePage(api: widget.api, usuario: usuario)));

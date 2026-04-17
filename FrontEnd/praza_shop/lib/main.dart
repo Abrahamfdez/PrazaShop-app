@@ -12,6 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final api = ApiService('https://prazashop-app.onrender.com');
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'PrazaShop',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),

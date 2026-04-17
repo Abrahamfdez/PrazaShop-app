@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/auth_response.dart';
+import '../models/producto_dto.dart';
 
 /// Excepción lanzada cuando la API responde con un código distinto de 2xx.
 class ApiException implements Exception {
@@ -83,7 +84,7 @@ class ApiService {
 
   Future<AuthResponse> refresh() async {
     if (_refreshToken == null) throw Exception('No refresh token available');
-    final uri = Uri.parse('$baseUrl/api/auth/refresh');
+    final uri = Uri.parse('$baseUrl/api/auth/refresh-token');
     try {
       final res = await http.post(uri,
           headers: _defaultHeaders(), body: json.encode({'refreshToken': _refreshToken}));
@@ -98,6 +99,40 @@ class ApiService {
       throw Exception('Network error (refresh): ${e.message}');
     } catch (e) {
       throw Exception('Refresh error: $e');
+    }
+  }
+
+  /// Obtiene todos los productos disponibles
+  Future<List<ProductoDto>> getProductos() async {
+    final uri = Uri.parse('$baseUrl/api/productos');
+    try {
+      final res = await http.get(uri, headers: _defaultHeaders());
+      if (res.statusCode == 200) {
+        final data = json.decode(res.body) as List<dynamic>;
+        return data.map((item) => ProductoDto.fromJson(item as Map<String, dynamic>)).toList();
+      }
+      throw Exception('Failed to load productos: ${res.statusCode}');
+    } on SocketException catch (e) {
+      throw Exception('Network error (getProductos): ${e.message}');
+    } catch (e) {
+      throw Exception('Get productos error: $e');
+    }
+  }
+
+  /// Obtiene un producto por ID
+  Future<ProductoDto> getProducto(int id) async {
+    final uri = Uri.parse('$baseUrl/api/productos/$id');
+    try {
+      final res = await http.get(uri, headers: _defaultHeaders());
+      if (res.statusCode == 200) {
+        final data = json.decode(res.body);
+        return ProductoDto.fromJson(data);
+      }
+      throw Exception('Failed to load producto: ${res.statusCode}');
+    } on SocketException catch (e) {
+      throw Exception('Network error (getProducto): ${e.message}');
+    } catch (e) {
+      throw Exception('Get producto error: $e');
     }
   }
 }

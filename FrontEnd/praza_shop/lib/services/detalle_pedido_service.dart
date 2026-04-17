@@ -8,7 +8,7 @@ class DetallePedidoService {
   DetallePedidoService(this.api);
 
   Future<List<DetallePedidoDto>> getAll() async {
-    final uri = Uri.parse('${api.baseUrl}/api/detalle-pedidos');
+    final uri = Uri.parse('${api.baseUrl}/api/detalles-pedidos');
     final res = await http.get(uri, headers: api.headers(jsonBody: false));
     if (res.statusCode == 200) {
       final data = json.decode(res.body) as List<dynamic>;
@@ -18,28 +18,28 @@ class DetallePedidoService {
   }
 
   Future<DetallePedidoDto> getById(int id) async {
-    final uri = Uri.parse('${api.baseUrl}/api/detalle-pedidos/$id');
+    final uri = Uri.parse('${api.baseUrl}/api/detalles-pedidos/$id');
     final res = await http.get(uri, headers: api.headers(jsonBody: false));
     if (res.statusCode == 200) return DetallePedidoDto.fromJson(json.decode(res.body));
     throw Exception('Get detalle-pedido failed: ${res.statusCode} ${res.body}');
   }
 
   Future<DetallePedidoDto> create(DetallePedidoDto d) async {
-    final uri = Uri.parse('${api.baseUrl}/api/detalle-pedidos');
+    final uri = Uri.parse('${api.baseUrl}/api/detalles-pedidos');
     final res = await http.post(uri, headers: api.headers(), body: json.encode(d.toJson()));
     if (res.statusCode == 200 || res.statusCode == 201) return DetallePedidoDto.fromJson(json.decode(res.body));
     throw Exception('Create detalle-pedido failed: ${res.statusCode} ${res.body}');
   }
 
   Future<DetallePedidoDto> update(int id, DetallePedidoDto d) async {
-    final uri = Uri.parse('${api.baseUrl}/api/detalle-pedidos/$id');
+    final uri = Uri.parse('${api.baseUrl}/api/detalles-pedidos/$id');
     final res = await http.put(uri, headers: api.headers(), body: json.encode(d.toJson()));
     if (res.statusCode == 200) return DetallePedidoDto.fromJson(json.decode(res.body));
     throw Exception('Update detalle-pedido failed: ${res.statusCode} ${res.body}');
   }
 
   Future<void> delete(int id) async {
-    final uri = Uri.parse('${api.baseUrl}/api/detalle-pedidos/$id');
+    final uri = Uri.parse('${api.baseUrl}/api/detalles-pedidos/$id');
     final res = await http.delete(uri, headers: api.headers(jsonBody: false));
     if (res.statusCode != 200 && res.statusCode != 204) throw Exception('Delete detalle-pedido failed: ${res.statusCode} ${res.body}');
   }
