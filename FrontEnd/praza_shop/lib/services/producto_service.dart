@@ -43,4 +43,13 @@ class ProductoService {
     final res = await http.delete(uri, headers: api.headers(jsonBody: false));
     if (res.statusCode != 200 && res.statusCode != 204) throw Exception('Delete producto failed: ${res.statusCode} ${res.body}');
   }
+  Future<List<ProductoDto>> getByNegocioId(int negocioId) async {
+  final uri = Uri.parse('${api.baseUrl}/api/productos/negocio/$negocioId');
+  final res = await http.get(uri, headers: api.headers(jsonBody: false));
+  if (res.statusCode == 200) {
+    final data = json.decode(res.body) as List<dynamic>;
+    return data.map((e) => ProductoDto.fromJson(e as Map<String, dynamic>)).toList();
+  }
+  throw Exception('Get productos by negocio failed: ${res.statusCode} ${res.body}');
+}
 }

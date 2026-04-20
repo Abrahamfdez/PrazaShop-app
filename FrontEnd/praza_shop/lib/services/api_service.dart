@@ -21,6 +21,8 @@ class ApiService {
   String? _refreshToken;
 
   ApiService(this.baseUrl);
+  /// Getter para acceder al token actual
+  String get token => _accessToken ?? '';
 
   void setTokens({String? accessToken, String? refreshToken}) {
     if (accessToken != null) _accessToken = accessToken;

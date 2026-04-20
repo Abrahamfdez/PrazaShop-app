@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'api_service.dart';
 import '../models/valoracion_dto.dart';
+import '../models/valoracion_estadisticas_dto.dart';
 
 class ValoracionService {
   final ApiService api;
@@ -42,6 +43,16 @@ class ValoracionService {
       return data.map((e) => ValoracionDto.fromJson(e as Map<String, dynamic>)).toList();
     }
     throw Exception('Get valoraciones by cliente failed: ${res.statusCode} ${res.body}');
+  }
+
+  /// Obtiene estadísticas de valoraciones para un negocio
+  Future<ValoracionEstadisticasDto> getEstadisticasByNegocioId(int negocioId) async {
+    final uri = Uri.parse('${api.baseUrl}/api/valoraciones/negocio/$negocioId/estadisticas');
+    final res = await http.get(uri, headers: api.headers(jsonBody: false));
+    if (res.statusCode == 200) {
+      return ValoracionEstadisticasDto.fromJson(json.decode(res.body));
+    }
+    throw Exception('Get estadisticas valoraciones failed: ${res.statusCode} ${res.body}');
   }
 
   Future<ValoracionDto> create(ValoracionDto v) async {

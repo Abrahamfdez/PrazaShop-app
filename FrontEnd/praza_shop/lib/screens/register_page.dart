@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:praza_shop/models/cliente_dto.dart';
+import 'package:praza_shop/models/negocio_dto.dart';
 import 'package:praza_shop/models/usuario_dto.dart';
 import 'package:praza_shop/models/role.dart';
 import 'package:praza_shop/services/api_service.dart';
 import 'package:praza_shop/services/cliente_service.dart';
+import 'package:praza_shop/services/negocio_service.dart';
 import 'package:praza_shop/utils/api_utils.dart';
 import 'package:praza_shop/widgets/user_type_option.dart';
+import 'package:praza_shop/screens/cliente_home_page.dart';
+import 'package:praza_shop/screens/negocio_panel_page.dart';
 
 /// Página de registro con todos los campos de `UsuarioDto` excepto `id`.
 ///
@@ -34,6 +38,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Role _selectedRole = Role.CLIENTE;
   bool _loading = false;
   late final ClienteService clienteService = ClienteService(widget.api);
+  late final NegocioService negocioService = NegocioService(widget.api);
 
   @override
   void dispose() {
@@ -74,10 +79,33 @@ class _RegisterPageState extends State<RegisterPage> {
           );
             await clienteService.create(clienteCreated);
             print("Usuario registrado como CLIENTE");
-             break;
-          case Role.NEGOCIO:    
+            if (!mounted) return;
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => ClienteHomePage(api: widget.api, usuario: usuarioCreado),
+              ),
+              (route) => false,
+            );
+            return;
+                         
+          case Role.NEGOCIO:
+          var negocioCreated = NegocioDto(
+            usuarioId: usuarioCreado.id,
+            nomeNegocio: _negocioNombreCtl.text.trim(),
+            direccion: _negocioDireccionCtl.text.trim(),
+            descricion: _negocioDescricionCtl.text.trim(),
+          );
+          await negocioService.create(negocioCreated);    
             print("Usuario registrado como NEGOCIO");
-             break; 
+            if (!mounted) return;
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => NegocioPanelPage(api: widget.api),
+              ),
+              (route) => false,
+            );
+            return;
+             
           case Role.ADMIN:      
             print("Usuario registrado como ADMIN");
              break; 
@@ -91,7 +119,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registro enviado')));
-      Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al registrar: ${e.toString()}')));

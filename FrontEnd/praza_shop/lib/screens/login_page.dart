@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:praza_shop/models/role.dart';
 import 'package:praza_shop/models/usuario_dto.dart';
+import 'package:praza_shop/screens/negocio_panel_page.dart';
 import 'package:praza_shop/screens/register_page.dart';
 import 'package:praza_shop/screens/cliente_home_page.dart';
 import 'package:praza_shop/utils/api_utils.dart';
@@ -48,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
             break;
             case Role.NEGOCIO:
             print("Navigate to negocio home page");
-             // Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => NegocioHomePage(api: widget.api, usuario: usuario)));
+             Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => NegocioPanelPage(api: widget.api)));
              break; 
           case Role.ADMIN:
             print("Navigate to admin dashboard");

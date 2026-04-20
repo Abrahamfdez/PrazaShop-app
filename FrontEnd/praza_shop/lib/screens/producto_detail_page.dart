@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:praza_shop/models/producto_dto.dart';
 import 'package:praza_shop/models/negocio_dto.dart';
+import 'package:praza_shop/models/valoracion_estadisticas_dto.dart';
 import 'package:praza_shop/services/api_service.dart';
 import 'package:praza_shop/services/negocio_service.dart';
+import 'package:praza_shop/services/valoracion_service.dart';
+import 'package:praza_shop/screens/comprar_page.dart';
 
 /// Pantalla de detalle de producto con información completa
 class ProductoDetailPage extends StatefulWidget {
@@ -21,20 +24,21 @@ class ProductoDetailPage extends StatefulWidget {
 
 class _ProductoDetailPageState extends State<ProductoDetailPage> {
   late NegocioService _negocioService;
+  late ValoracionService _valoracionService;
   NegocioDto? _negocio;
+  ValoracionEstadisticasDto? _estadisticas;
   bool _isLoading = true;
-  double _rating = 4.9;
-  int _reviewCount = 56;
 
   @override
   void initState() {
     super.initState();
     _negocioService = NegocioService(widget.api);
-    _cargarNegocio();
+    _valoracionService = ValoracionService(widget.api);
+    _cargarDatos();
   }
 
-  /// Carga la información del negocio
-  Future<void> _cargarNegocio() async {
+  /// Carga la información del negocio y sus estadísticas
+  Future<void> _cargarDatos() async {
     if (widget.producto.negocioId == null) {
       setState(() {
         _isLoading = false;
@@ -44,12 +48,15 @@ class _ProductoDetailPageState extends State<ProductoDetailPage> {
 
     try {
       final negocio = await _negocioService.getById(widget.producto.negocioId!);
+      final estadisticas =
+          await _valoracionService.getEstadisticasByNegocioId(widget.producto.negocioId!);
       setState(() {
         _negocio = negocio;
+        _estadisticas = estadisticas;
         _isLoading = false;
       });
     } catch (e) {
-      print('Error al cargar negocio: $e');
+      print('Error al cargar datos: $e');
       setState(() {
         _isLoading = false;
       });
@@ -145,29 +152,31 @@ class _ProductoDetailPageState extends State<ProductoDetailPage> {
                             ),
                             const SizedBox(height: 8),
                             // Rating
-                            Row(
-                              children: [
-                                Row(
-                                  children: List.generate(5, (index) {
-                                    return Icon(
-                                      index < _rating.floor()
-                                          ? Icons.star
-                                          : Icons.star_border,
-                                      color: Colors.amber,
-                                      size: 18,
-                                    );
-                                  }),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  '$_rating ($_reviewCount)',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
+                            if (_estadisticas != null)
+                              Row(
+                                children: [
+                                  Row(
+                                    children: List.generate(5, (index) {
+                                      final rating = _estadisticas!.mediaPuntuacion ?? 0;
+                                      return Icon(
+                                        index < rating.floor()
+                                            ? Icons.star
+                                            : Icons.star_border,
+                                        color: Colors.amber,
+                                        size: 18,
+                                      );
+                                    }),
                                   ),
-                                ),
-                              ],
-                            ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    '${_estadisticas!.mediaPuntuacion?.toStringAsFixed(1) ?? '0'} (${_estadisticas!.cantidadValoraciones ?? 0})',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             const SizedBox(height: 8),
                             // Stock
                             Container(
@@ -300,12 +309,13 @@ class _ProductoDetailPageState extends State<ProductoDetailPage> {
                       ),
                       onPressed: isInStock
                           ? () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    '${widget.producto.nome} añadido al carrito',
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => ComprarPage(
+                                    producto: widget.producto,
+                                    negocio: _negocio,
+                                    api: widget.api,
                                   ),
-                                  duration: const Duration(seconds: 2),
                                 ),
                               );
                             }
