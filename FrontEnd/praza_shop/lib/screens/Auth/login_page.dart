@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:praza_shop/models/role.dart';
 import 'package:praza_shop/models/usuario_dto.dart';
-import 'package:praza_shop/screens/negocio_panel_page.dart';
-import 'package:praza_shop/screens/register_page.dart';
-import 'package:praza_shop/screens/cliente_home_page.dart';
+import 'package:praza_shop/screens/Negocio/negocio_panel_page.dart';
+import 'package:praza_shop/screens/Auth/register_page.dart';
+import 'package:praza_shop/screens/Cliente/cliente_home_page.dart';
 import 'package:praza_shop/utils/api_utils.dart';
-import '../services/api_service.dart';
+import '../../services/api_service.dart';
 
 
 

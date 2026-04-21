@@ -8,8 +8,8 @@ import 'package:praza_shop/services/cliente_service.dart';
 import 'package:praza_shop/services/negocio_service.dart';
 import 'package:praza_shop/utils/api_utils.dart';
 import 'package:praza_shop/widgets/user_type_option.dart';
-import 'package:praza_shop/screens/cliente_home_page.dart';
-import 'package:praza_shop/screens/negocio_panel_page.dart';
+import 'package:praza_shop/screens/Cliente/cliente_home_page.dart';
+import 'package:praza_shop/screens/Negocio/negocio_panel_page.dart';
 
 /// Página de registro con todos los campos de `UsuarioDto` excepto `id`.
 ///

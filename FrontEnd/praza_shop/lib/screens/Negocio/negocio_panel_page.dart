@@ -7,8 +7,9 @@ import 'package:praza_shop/services/producto_service.dart';
 import 'package:praza_shop/services/pedido_service.dart';
 import 'package:praza_shop/services/valoracion_service.dart';
 import 'package:praza_shop/utils/api_utils.dart';
-import 'package:praza_shop/screens/crear_producto_page.dart';
-import 'package:praza_shop/screens/ventas_page.dart';
+import 'package:praza_shop/screens/Negocio/crear_producto_page.dart';
+import 'package:praza_shop/screens/Negocio/editar_producto_page.dart';
+import 'package:praza_shop/screens/Negocio/ventas_page.dart';
 
 /// Página del panel de negocio
 class NegocioPanelPage extends StatefulWidget {
@@ -433,16 +434,18 @@ class _NegocioPanelPageState extends State<NegocioPanelPage> {
                                                   color: Colors.grey,
                                                   size: 20,
                                                 ),
-                                                onPressed: () {
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    const SnackBar(
-                                                      content: Text(
-                                                        'Función de editar en desarrollo',
+                                                onPressed: () async {
+                                                  final result = await Navigator.of(context).push<bool>(
+                                                    MaterialPageRoute(
+                                                      builder: (_) => EditarProductoPage(
+                                                        api: widget.api,
+                                                        producto: producto,
                                                       ),
                                                     ),
                                                   );
+                                                  if (result == true) {
+                                                    _cargarDatos();
+                                                  }
                                                 },
                                               ),
                                               IconButton(

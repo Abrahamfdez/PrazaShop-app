@@ -5,7 +5,7 @@ import 'package:praza_shop/models/valoracion_estadisticas_dto.dart';
 import 'package:praza_shop/services/api_service.dart';
 import 'package:praza_shop/services/negocio_service.dart';
 import 'package:praza_shop/services/valoracion_service.dart';
-import 'package:praza_shop/screens/comprar_page.dart';
+import 'package:praza_shop/screens/Cliente/comprar_page.dart';
 
 /// Pantalla de detalle de producto con información completa
 class ProductoDetailPage extends StatefulWidget {

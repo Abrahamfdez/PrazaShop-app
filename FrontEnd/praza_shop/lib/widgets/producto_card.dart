@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:praza_shop/models/producto_dto.dart';
 import 'package:praza_shop/services/negocio_service.dart';
-import 'package:praza_shop/screens/producto_detail_page.dart';
+import 'package:praza_shop/screens/Cliente/producto_detail_page.dart';
 import 'package:praza_shop/services/api_service.dart';
 
 /// Widget que construye una tarjeta de producto con imagen, nombre, negocio, precio y botón de compra

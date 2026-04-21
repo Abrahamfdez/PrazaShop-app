@@ -116,6 +116,8 @@ public class SecurityConfig {
                     .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
                     // Permite acceso sin autenticación al endpoint de prueba
                     .requestMatchers(HttpMethod.GET, "/api/test/hola").permitAll()
+                    // Permite acceso a Swagger UI y OpenAPI
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/webjars/**").permitAll()
                     // El resto de endpoints requieren autenticación
                     .anyRequest().authenticated()
             )

@@ -3,7 +3,7 @@ import 'package:praza_shop/models/detalle_pedido_dto.dart';
 import 'package:praza_shop/models/pedido_dto.dart';
 import 'package:praza_shop/models/producto_dto.dart';
 import 'package:praza_shop/models/negocio_dto.dart';
-import 'package:praza_shop/screens/valoracion_compra_page.dart';
+import 'package:praza_shop/screens/Cliente/valoracion_compra_page.dart';
 import 'package:praza_shop/services/api_service.dart';
 import 'package:praza_shop/services/cliente_service.dart';
 import 'package:praza_shop/services/detalle_pedido_service.dart';
