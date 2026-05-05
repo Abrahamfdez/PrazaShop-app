@@ -1,6 +1,7 @@
 package org.example.prazashop.service;
 
 import org.example.prazashop.model.dto.PedidoDto;
+import org.example.prazashop.model.dto.PedidoConDetallesDto;
 
 import java.util.List;
 
@@ -55,6 +56,14 @@ public interface PedidoService {
      * @return lista de pedidos
      */
     List<PedidoDto> findByClienteId(Long clienteId);
+
+    /**
+     * Busca pedidos con detalles por id de cliente.
+     *
+     * @param clienteId id del cliente
+     * @return lista de pedidos con sus detalles
+     */
+    List<PedidoConDetallesDto> findByClienteIdConDetalles(Long clienteId);
 
     /**
      * Busca pedidos por id de negocio.

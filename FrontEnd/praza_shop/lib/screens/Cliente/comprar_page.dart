@@ -119,7 +119,6 @@ class _ComprarPageState extends State<ComprarPage> {
       pedidoId: pedidoCreated.id!, 
     );
     var detalleCreated=await DetallePedidoService(widget.api).create(detalle);
-    // TODO: Implementar lógica de compra con API
     Navigator.of(context).pop();
     // Navegar a la página de valoración
     Navigator.of(context).push(

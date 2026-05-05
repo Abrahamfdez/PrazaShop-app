@@ -5,6 +5,8 @@ import org.example.prazashop.exception.NoContentException;
 import org.example.prazashop.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.prazashop.model.dto.PedidoDto;
+import org.example.prazashop.model.dto.PedidoConDetallesDto;
+import org.example.prazashop.model.dto.DetallePedidoConProductoDto;
 import org.example.prazashop.model.entity.Cliente;
 import org.example.prazashop.model.entity.Negocio;
 import org.example.prazashop.model.entity.Pedido;
@@ -88,6 +90,14 @@ public class PedidoServiceImpl implements PedidoService {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<PedidoConDetallesDto> findByClienteIdConDetalles(Long clienteId) {
+        return pedidoRepository.findByCliente_IdCliente(clienteId).stream()
+                .map(this::toDtoConDetalles)
+                .toList();
+    }
+
     private PedidoDto toDto(Pedido pedido) {
         return PedidoDto.builder()
                 .id(pedido.getIdPedido())
@@ -140,5 +150,35 @@ public class PedidoServiceImpl implements PedidoService {
         if (dto.getTotal() == null || dto.getTotal() < 0) {
             throw new BadRequestException("total debe ser mayor o igual a 0");
         }
+    }
+
+    private PedidoConDetallesDto toDtoConDetalles(Pedido pedido) {
+        List<DetallePedidoConProductoDto> detalles = pedido.getDetalles() != null ?
+                pedido.getDetalles().stream()
+                        .map(detalle -> DetallePedidoConProductoDto.builder()
+                                .idDetalle(detalle.getIdDetalle())
+                                .pedidoId(detalle.getPedido() != null ? detalle.getPedido().getIdPedido() : null)
+                                .productoId(detalle.getProducto() != null ? detalle.getProducto().getIdProducto() : null)
+                                .nombreProducto(detalle.getProducto() != null ? detalle.getProducto().getNome() : null)
+                                .cantidade(detalle.getCantidade())
+                                .prezoUnitario(detalle.getPrezoUnitario())
+                                .subtotal(detalle.getCantidade() != null && detalle.getPrezoUnitario() != null ?
+                                        detalle.getCantidade() * detalle.getPrezoUnitario() : null)
+                                .build())
+                        .toList()
+                : List.of();
+
+        return PedidoConDetallesDto.builder()
+                .idPedido(pedido.getIdPedido())
+                .clienteId(pedido.getCliente() != null ? pedido.getCliente().getIdCliente() : null)
+                .negocioId(pedido.getNegocio() != null ? pedido.getNegocio().getIdNegocio() : null)
+                .dataPedido(pedido.getDataPedido())
+                .dataConfirmacion(pedido.getDataConfirmacion())
+                .dataEntrega(pedido.getDataEntrega())
+                .dataCancelacion(pedido.getDataCancelacion())
+                .estado(pedido.getEstado())
+                .total(pedido.getTotal())
+                .detalles(detalles)
+                .build();
     }
 }

@@ -5,6 +5,7 @@ import 'package:praza_shop/models/negocio_dto.dart';
 import 'package:praza_shop/services/api_service.dart';
 import 'package:praza_shop/services/negocio_service.dart';
 import 'package:praza_shop/widgets/producto_card.dart';
+import 'cliente_pedidos_page.dart';
 
 /// Página principal para clientes que muestra productos disponibles
 /// y permite buscar y filtrar por categorías.
@@ -125,22 +126,35 @@ class _ClienteHomePageState extends State<ClienteHomePage> {
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-            child: Row(
-              children: [
-                Text(
-                  'Hola ${widget.usuario.nome ?? 'Usuario'}',
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ClientePedidosPage(
+                      api: widget.api,
+                      usuario: widget.usuario,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                CircleAvatar(
-                  backgroundColor: Colors.grey[300],
-                  child: const Icon(Icons.person, color: Colors.grey),
-                ),
-              ],
+                );
+              },
+              child: Row(
+                children: [
+                  Text(
+                    'Hola ${widget.usuario.nome ?? 'Usuario'}',
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  CircleAvatar(
+                    backgroundColor: Colors.grey[300],
+                    child: const Icon(Icons.person, color: Colors.grey),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

@@ -1,6 +1,7 @@
 package org.example.prazashop.controller;
 
 import org.example.prazashop.model.dto.PedidoDto;
+import org.example.prazashop.model.dto.PedidoConDetallesDto;
 import org.example.prazashop.service.PedidoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -93,6 +94,18 @@ public class PedidoController {
     @GetMapping("/cliente/{clienteId}")
     public ResponseEntity<List<PedidoDto>> getPedidosByClienteId(@PathVariable Long clienteId) {
         List<PedidoDto> pedidos = pedidoService.findByClienteId(clienteId);
+        return ResponseEntity.ok(pedidos);
+    }
+
+    /**
+     * Obtiene todos los pedidos con detalles de un cliente por su id.
+     *
+     * @param clienteId identificador del cliente
+     * @return lista de pedidos con sus detalles
+     */
+    @GetMapping("/cliente/{clienteId}/detalles")
+    public ResponseEntity<List<PedidoConDetallesDto>> getPedidosByClienteIdConDetalles(@PathVariable Long clienteId) {
+        List<PedidoConDetallesDto> pedidos = pedidoService.findByClienteIdConDetalles(clienteId);
         return ResponseEntity.ok(pedidos);
     }
 

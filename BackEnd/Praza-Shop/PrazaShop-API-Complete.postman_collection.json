@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "prazashop-complete-collection",
     "name": "PrazaShop API - Colección Completa",
-    "description": "Colección completa de endpoints funcionales de PrazaShop API",
+    "description": "Colección completa de endpoints funcionales de PrazaShop API - Actualizado 2026",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -40,10 +40,10 @@
               "raw": "{\n  \"nome\": \"Juan García\",\n  \"email\": \"juan.garcia@example.com\",\n  \"contrasinal\": \"password123\",\n  \"telefono\": \"+34 612 345 678\",\n  \"tipoUsuario\": \"CLIENTE\"\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/auth/register",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/auth/register",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "auth", "register"]
             }
           },
@@ -80,10 +80,10 @@
               "raw": "{\n  \"email\": \"a@admin.es\",\n  \"contrasinal\": \"admin\"\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/auth/login",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/auth/login",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "auth", "login"]
             }
           },
@@ -104,10 +104,10 @@
               "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/auth/refresh",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/auth/refresh",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "auth", "refresh"]
             }
           },
@@ -129,10 +129,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/productos",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/productos",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "productos"]
             }
           },
@@ -149,10 +149,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/productos/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/productos/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "productos", "1"]
             }
           },
@@ -177,10 +177,10 @@
               "raw": "{\n  \"negocioId\": 1,\n  \"nome\": \"Producto Nuevo\",\n  \"descricion\": \"Descripción del producto\",\n  \"prezo\": 29.99,\n  \"stock\": 100,\n  \"categoria\": \"Electrónica\",\n  \"imaxe\": \"https://via.placeholder.com/150\"\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/productos",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/productos",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "productos"]
             }
           },
@@ -205,10 +205,10 @@
               "raw": "{\n  \"negocioId\": 1,\n  \"nome\": \"Producto Actualizado\",\n  \"descricion\": \"Nueva descripción\",\n  \"prezo\": 39.99,\n  \"stock\": 50,\n  \"categoria\": \"Electrónica\"\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/productos/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/productos/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "productos", "1"]
             }
           },
@@ -225,11 +225,31 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/productos/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/productos/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "productos", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener productos por negocio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://prazashop-app.onrender.com/api/productos/negocio/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
+              "path": ["api", "productos", "negocio", "1"]
             }
           },
           "response": []
@@ -250,10 +270,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/clientes",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/clientes",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "clientes"]
             }
           },
@@ -270,10 +290,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/clientes/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/clientes/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "clientes", "1"]
             }
           },
@@ -298,10 +318,10 @@
               "raw": "{\n  \"usuarioId\": 1,\n  \"empresa\": \"Mi Empresa\",\n  \"nif\": \"12345678A\",\n  \"provincia\": \"Madrid\",\n  \"direccion\": \"Calle Principal 123\",\n  \"cp\": \"28001\"\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/clientes",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/clientes",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "clientes"]
             }
           },
@@ -326,10 +346,10 @@
               "raw": "{\n  \"usuarioId\": 1,\n  \"empresa\": \"Empresa Actualizada\",\n  \"nif\": \"12345678A\",\n  \"provincia\": \"Barcelona\",\n  \"direccion\": \"Avenida Nueva 456\",\n  \"cp\": \"08001\"\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/clientes/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/clientes/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "clientes", "1"]
             }
           },
@@ -346,11 +366,31 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/clientes/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/clientes/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "clientes", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener cliente por ID de usuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://prazashop-app.onrender.com/api/clientes/usuario/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
+              "path": ["api", "clientes", "usuario", "1"]
             }
           },
           "response": []
@@ -371,10 +411,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/negocios",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/negocios",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "negocios"]
             }
           },
@@ -391,10 +431,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/negocios/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/negocios/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "negocios", "1"]
             }
           },
@@ -419,10 +459,10 @@
               "raw": "{\n  \"usuarioId\": 1,\n  \"nome\": \"Mi Negocio\",\n  \"descricion\": \"Descripción del negocio\",\n  \"categoria\": \"Tienda\",\n  \"provincia\": \"Madrid\",\n  \"logo\": \"https://via.placeholder.com/200\"\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/negocios",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/negocios",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "negocios"]
             }
           },
@@ -447,10 +487,10 @@
               "raw": "{\n  \"usuarioId\": 1,\n  \"nome\": \"Mi Negocio Actualizado\",\n  \"descricion\": \"Nueva descripción\",\n  \"categoria\": \"Tienda Premium\",\n  \"provincia\": \"Barcelona\",\n  \"logo\": \"https://via.placeholder.com/200\"\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/negocios/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/negocios/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "negocios", "1"]
             }
           },
@@ -467,11 +507,31 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/negocios/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/negocios/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "negocios", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener negocio por ID de usuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://prazashop-app.onrender.com/api/negocios/usuario/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
+              "path": ["api", "negocios", "usuario", "1"]
             }
           },
           "response": []
@@ -492,10 +552,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/pedidos",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/pedidos",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "pedidos"]
             }
           },
@@ -512,10 +572,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/pedidos/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/pedidos/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "pedidos", "1"]
             }
           },
@@ -540,10 +600,10 @@
               "raw": "{\n  \"clienteId\": 1,\n  \"estado\": \"PENDIENTE\",\n  \"total\": 99.99,\n  \"data\": \"2026-04-21\"\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/pedidos",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/pedidos",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "pedidos"]
             }
           },
@@ -568,10 +628,10 @@
               "raw": "{\n  \"clienteId\": 1,\n  \"estado\": \"ENVIADO\",\n  \"total\": 99.99,\n  \"data\": \"2026-04-21\"\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/pedidos/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/pedidos/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "pedidos", "1"]
             }
           },
@@ -588,11 +648,51 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/pedidos/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/pedidos/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "pedidos", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener pedidos por cliente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://prazashop-app.onrender.com/api/pedidos/cliente/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
+              "path": ["api", "pedidos", "cliente", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener pedidos por negocio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://prazashop-app.onrender.com/api/pedidos/negocio/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
+              "path": ["api", "pedidos", "negocio", "1"]
             }
           },
           "response": []
@@ -613,10 +713,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/detalles-pedidos",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/detalles-pedidos",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "detalles-pedidos"]
             }
           },
@@ -633,10 +733,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/detalles-pedidos/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/detalles-pedidos/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "detalles-pedidos", "1"]
             }
           },
@@ -661,10 +761,10 @@
               "raw": "{\n  \"pedidoId\": 1,\n  \"productoId\": 1,\n  \"cantidade\": 2,\n  \"prezoUnitario\": 29.99\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/detalles-pedidos",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/detalles-pedidos",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "detalles-pedidos"]
             }
           },
@@ -689,10 +789,10 @@
               "raw": "{\n  \"pedidoId\": 1,\n  \"productoId\": 1,\n  \"cantidade\": 3,\n  \"prezoUnitario\": 29.99\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/detalles-pedidos/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/detalles-pedidos/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "detalles-pedidos", "1"]
             }
           },
@@ -709,10 +809,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/detalles-pedidos/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/detalles-pedidos/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "detalles-pedidos", "1"]
             }
           },
@@ -734,10 +834,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/compras-recurrentes",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/compras-recurrentes",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "compras-recurrentes"]
             }
           },
@@ -754,10 +854,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/compras-recurrentes/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/compras-recurrentes/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "compras-recurrentes", "1"]
             }
           },
@@ -782,10 +882,10 @@
               "raw": "{\n  \"clienteId\": 1,\n  \"productoId\": 1,\n  \"cantidade\": 5,\n  \"frecuencia\": \"MENSUAL\",\n  \"ativa\": true\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/compras-recurrentes",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/compras-recurrentes",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "compras-recurrentes"]
             }
           },
@@ -810,10 +910,10 @@
               "raw": "{\n  \"clienteId\": 1,\n  \"productoId\": 1,\n  \"cantidade\": 10,\n  \"frecuencia\": \"QUINCENAL\",\n  \"ativa\": true\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/compras-recurrentes/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/compras-recurrentes/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "compras-recurrentes", "1"]
             }
           },
@@ -830,10 +930,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/compras-recurrentes/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/compras-recurrentes/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "compras-recurrentes", "1"]
             }
           },
@@ -855,10 +955,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/valoraciones",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/valoraciones",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "valoraciones"]
             }
           },
@@ -875,10 +975,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/valoraciones/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/valoraciones/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "valoraciones", "1"]
             }
           },
@@ -903,10 +1003,10 @@
               "raw": "{\n  \"usuarioId\": 1,\n  \"productoId\": 1,\n  \"puntuacion\": 5,\n  \"comentario\": \"Excelente producto!\",\n  \"data\": \"2026-04-21\"\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/valoraciones",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/valoraciones",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "valoraciones"]
             }
           },
@@ -931,10 +1031,10 @@
               "raw": "{\n  \"usuarioId\": 1,\n  \"productoId\": 1,\n  \"puntuacion\": 4,\n  \"comentario\": \"Muy bueno, pequeño defecto en el empaquetado\",\n  \"data\": \"2026-04-21\"\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/valoraciones/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/valoraciones/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "valoraciones", "1"]
             }
           },
@@ -951,11 +1051,71 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/valoraciones/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/valoraciones/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "valoraciones", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener valoraciones por negocio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://prazashop-app.onrender.com/api/valoraciones/negocio/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
+              "path": ["api", "valoraciones", "negocio", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener valoraciones por cliente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://prazashop-app.onrender.com/api/valoraciones/cliente/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
+              "path": ["api", "valoraciones", "cliente", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener estadísticas de valoraciones por negocio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "https://prazashop-app.onrender.com/api/valoraciones/negocio/1/estadisticas",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
+              "path": ["api", "valoraciones", "negocio", "1", "estadisticas"]
             }
           },
           "response": []
@@ -976,10 +1136,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/usuarios",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/usuarios",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "usuarios"]
             }
           },
@@ -996,10 +1156,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/usuarios/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/usuarios/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "usuarios", "1"]
             }
           },
@@ -1024,10 +1184,10 @@
               "raw": "{\n  \"nome\": \"Nuevo Usuario\",\n  \"email\": \"nuevo.usuario@example.com\",\n  \"contrasinal\": \"password123\",\n  \"telefono\": \"+34 612 345 678\",\n  \"tipoUsuario\": \"CLIENTE\"\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/usuarios",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/usuarios",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "usuarios"]
             }
           },
@@ -1052,10 +1212,10 @@
               "raw": "{\n  \"nome\": \"Usuario Actualizado\",\n  \"email\": \"usuario.actualizado@example.com\",\n  \"contrasinal\": \"newpassword456\",\n  \"telefono\": \"+34 698 765 432\",\n  \"tipoUsuario\": \"VENDEDOR\"\n}"
             },
             "url": {
-              "raw": "http://localhost:8080/api/usuarios/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/usuarios/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "usuarios", "1"]
             }
           },
@@ -1072,10 +1232,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:8080/api/usuarios/1",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/usuarios/1",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "usuarios", "1"]
             }
           },
@@ -1092,10 +1252,10 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:8080/api/test/hola",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
+              "raw": "https://prazashop-app.onrender.com/api/test/hola",
+              "protocol": "https",
+              "host": ["prazashop-app.onrender.com"],
+              
               "path": ["api", "test", "hola"]
             }
           },
@@ -1117,4 +1277,8 @@
     }
   ]
 }
+
+
+
+
 
