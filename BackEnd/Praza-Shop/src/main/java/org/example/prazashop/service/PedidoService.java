@@ -66,6 +66,14 @@ public interface PedidoService {
     List<PedidoConDetallesDto> findByClienteIdConDetalles(Long clienteId);
 
     /**
+     * Busca pedidos con detalles por id de negocio.
+     *
+     * @param negocioId id del negocio
+     * @return lista de pedidos con sus detalles
+     */
+    List<PedidoConDetallesDto> findByNegocioIdConDetalles(Long negocioId);
+
+    /**
      * Busca pedidos por id de negocio.
      *
      * @param negocioId id del negocio

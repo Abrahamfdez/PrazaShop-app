@@ -17,7 +17,7 @@ import java.util.List;
 public class NegocioDashboardDto {
     private NegocioDto negocio;
     private List<ProductoDto> productos;
-    private List<PedidoDto> pedidosRecientes;
+    private List<PedidoConDetallesDto> pedidosRecientes;
     private DashboardStats stats;
 
     @Data

@@ -5,6 +5,7 @@ import org.example.prazashop.exception.NoContentException;
 import org.example.prazashop.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.prazashop.model.dto.NegocioDto;
+import org.example.prazashop.model.dto.PedidoConDetallesDto;
 import org.example.prazashop.model.dto.NegocioDashboardDto;
 import org.example.prazashop.model.dto.ProductoDto;
 import org.example.prazashop.model.dto.PedidoDto;
@@ -137,7 +138,7 @@ public class NegocioServiceImpl implements NegocioService {
                 .toList();
 
         // Obtener últimos 10 pedidos
-        List<PedidoDto> pedidosRecientes = pedidoService.findByNegocioId(negocioId).stream()
+        List<PedidoConDetallesDto> pedidosRecientes = pedidoService.findByNegocioIdConDetalles(negocioId).stream()
                 .limit(10)
                 .toList();
 

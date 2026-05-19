@@ -107,6 +107,14 @@ public class PedidoServiceImpl implements PedidoService {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<PedidoConDetallesDto> findByNegocioIdConDetalles(Long negocioId) {
+        return pedidoRepository.findByNegocio_IdNegocio(negocioId).stream()
+                .map(this::toDtoConDetalles)
+                .toList();
+    }
+
     private PedidoDto toDto(Pedido pedido) {
         return PedidoDto.builder()
                 .id(pedido.getIdPedido())
