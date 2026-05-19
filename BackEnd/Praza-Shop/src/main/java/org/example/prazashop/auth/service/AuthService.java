@@ -10,7 +10,14 @@ import org.example.prazashop.exception.BadRequestException;
 import org.example.prazashop.exception.ConflictException;
 import org.example.prazashop.exception.NotFoundException;
 import org.example.prazashop.model.entity.Usuario;
+import org.example.prazashop.model.entity.Negocio;
+import org.example.prazashop.model.dto.UsuarioDto;
+import org.example.prazashop.model.dto.NegocioDto;
+import org.example.prazashop.model.dto.VendedorRegistroRequest;
+import org.example.prazashop.model.dto.VendedorRegistroResponse;
 import org.example.prazashop.repository.UsuarioRepository;
+import org.example.prazashop.repository.NegocioRepository;
+import org.example.prazashop.service.NegocioService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,8 +39,12 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     // Repositorio de usuarios para acceder a los datos de usuario
     private final UsuarioRepository usuarioRepository;
+    // Repositorio de negocios
+    private final NegocioRepository negocioRepository;
     // Servicio para generar y validar JWT
     private final JwtService JwtService;
+    // Servicio de negocio
+    private final NegocioService negocioService;
 
     /**
      * Registra un nuevo usuario y genera tokens de acceso y refresh.
@@ -200,5 +211,88 @@ public class AuthService {
                 .accessToken(newAccessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    /**
+     * Registra un nuevo vendedor (usuario + negocio) en transacción atómica.
+     * @param request datos del vendedor (email, contraseña, nombreNegocio, descripcion)
+     * @return respuesta con usuario, negocio y tokens
+     */
+    @Transactional
+    public VendedorRegistroResponse registrarVendedor(VendedorRegistroRequest request) {
+        // Validar campos obligatorios
+        if (request.getEmail() == null || request.getEmail().isBlank()) {
+            throw new BadRequestException("Email es obligatorio");
+        }
+        if (request.getContraseña() == null || request.getContraseña().isBlank()) {
+            throw new BadRequestException("Contraseña es obligatoria");
+        }
+        if (request.getNombreNegocio() == null || request.getNombreNegocio().isBlank()) {
+            throw new BadRequestException("Nombre del negocio es obligatorio");
+        }
+
+        // Normalizar email
+        String email = request.getEmail().trim().toLowerCase();
+
+        // Validar que email no exista
+        if (usuarioRepository.existsByEmail(email)) {
+            throw new ConflictException("Email ya registrado");
+        }
+
+        try {
+            // Crear usuario con rol NEGOCIO (vendedor)
+            var usuario = Usuario.builder()
+                    .email(email)
+                    .contrasinal(passwordEncoder.encode(request.getContraseña()))
+                    .tipoUsuario(org.example.prazashop.model.TipoUsuario.NEGOCIO)
+                    .nome(request.getNombreNegocio())
+                    .build();
+
+            var usuarioGuardado = usuarioRepository.save(usuario);
+
+            // Crear negocio asociado
+            var negocio = new Negocio();
+            negocio.setUsuario(usuarioGuardado);
+            negocio.setNomeNegocio(request.getNombreNegocio());
+            negocio.setDescricion(request.getDescripcion());
+            negocio.setDireccion(""); // Dirección por defecto vacía
+
+            var negocioGuardado = negocioRepository.save(negocio);
+
+            // Generar tokens
+            var accessToken = JwtService.generateToken(usuarioGuardado);
+            var refreshToken = JwtService.generateRefreshToken(usuarioGuardado);
+
+            // Guardar tokens
+            saveUserToken(usuarioGuardado, accessToken, Token.TipoToken.ACCESS);
+            saveUserToken(usuarioGuardado, refreshToken, Token.TipoToken.REFRESH);
+
+            // Construir DTOs para respuesta
+            var usuarioDto = UsuarioDto.builder()
+                    .id(usuarioGuardado.getId())
+                    .email(usuarioGuardado.getEmail())
+                    .nome(usuarioGuardado.getNome())
+                    .tipoUsuario(usuarioGuardado.getTipoUsuario())
+                    .build();
+
+            var negocioDto = NegocioDto.builder()
+                    .id(negocioGuardado.getIdNegocio())
+                    .usuarioId(negocioGuardado.getUsuario() != null ? negocioGuardado.getUsuario().getId() : null)
+                    .nomeNegocio(negocioGuardado.getNomeNegocio())
+                    .direccion(negocioGuardado.getDireccion())
+                    .descricion(negocioGuardado.getDescricion())
+                    .build();
+
+            // Retornar respuesta
+            return VendedorRegistroResponse.builder()
+                    .usuario(usuarioDto)
+                    .negocio(negocioDto)
+                    .token(accessToken)
+                    .refreshToken(refreshToken)
+                    .build();
+
+        } catch (DataIntegrityViolationException ex) {
+            throw new ConflictException("Email ya registrado");
+        }
     }
 }

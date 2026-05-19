@@ -74,4 +74,54 @@ class PedidoService {
     }
     throw Exception('Get pedidos with details by cliente failed: ${res.statusCode} ${res.body}');
   }
+
+  /// Crea un pedido completo con detalles en una sola llamada atómica
+  Future<PedidoConDetallesDto> crearPedidoCompleto({
+    required int clienteId,
+    required int negocioId,
+    required List<Map<String, dynamic>> detalles, // [{productoId, cantidad}, ...]
+  }) async {
+    final uri = Uri.parse('${api.baseUrl}/api/pedidos/crear-completo');
+    final body = json.encode({
+      'clienteId': clienteId,
+      'negocioId': negocioId,
+      'detalles': detalles,
+    });
+    final res = await http.post(uri, headers: api.headers(), body: body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return PedidoConDetallesDto.fromJson(json.decode(res.body));
+    }
+    throw Exception('Crear pedido completo failed: ${res.statusCode} ${res.body}');
+  }
+
+  /// Busca pedidos con filtros y paginación
+  Future<Map<String, dynamic>> buscarPedidos({
+    String? estado,
+    String? fechaDesde,
+    String? fechaHasta,
+    double? precioDesde,
+    double? precioHasta,
+    String ordenar = 'fecha_desc',
+    int pagina = 0,
+    int tamano = 10,
+  }) async {
+    final params = <String, String>{
+      'ordenar': ordenar,
+      'pagina': pagina.toString(),
+      'tamano': tamano.toString(),
+    };
+
+    if (estado != null) params['estado'] = estado;
+    if (fechaDesde != null) params['fechaDesde'] = fechaDesde;
+    if (fechaHasta != null) params['fechaHasta'] = fechaHasta;
+    if (precioDesde != null) params['precioDesde'] = precioDesde.toString();
+    if (precioHasta != null) params['precioHasta'] = precioHasta.toString();
+
+    final uri = Uri.parse('${api.baseUrl}/api/pedidos/buscar').replace(queryParameters: params);
+    final res = await http.get(uri, headers: api.headers(jsonBody: false));
+    if (res.statusCode == 200) {
+      return json.decode(res.body) as Map<String, dynamic>;
+    }
+    throw Exception('Buscar pedidos failed: ${res.statusCode} ${res.body}');
+  }
 }

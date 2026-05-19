@@ -1,9 +1,12 @@
 package org.example.prazashop.controller;
 
 import org.example.prazashop.model.dto.NegocioDto;
+import org.example.prazashop.model.dto.NegocioDashboardDto;
 import org.example.prazashop.service.NegocioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -94,5 +97,33 @@ public class NegocioController {
     public ResponseEntity<NegocioDto> getNegocioByUsuarioId(@PathVariable Long usuarioId) {
         NegocioDto dto = negocioService.findByUsuarioId(usuarioId);
         return ResponseEntity.ok(dto);
+    }
+
+    /**
+     * Obtiene el dashboard completo de un negocio con estadísticas.
+     * Solo el propietario del negocio puede acceder a su dashboard.
+     *
+     * @param id identificador del negocio
+     * @return dashboard con info completa del negocio
+     */
+    @GetMapping("/{id}/dashboard")
+    public ResponseEntity<NegocioDashboardDto> getDashboard(@PathVariable Long id) {
+        // Obtener usuario autenticado del contexto de seguridad
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String authenticatedEmail = authentication != null ? authentication.getName() : null;
+        
+        if (authenticatedEmail == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        // Validar que el usuario autenticado es dueño del negocio
+        NegocioDto negocioDto = negocioService.findById(id);
+        // Aquí extraemos el email del usuario propietario del negocio
+        if (!negocioService.isOwnerOfNegocio(id, authenticatedEmail)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        NegocioDashboardDto dashboard = negocioService.getDashboard(id);
+        return ResponseEntity.ok(dashboard);
     }
 }

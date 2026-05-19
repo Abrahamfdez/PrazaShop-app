@@ -2,11 +2,13 @@ package org.example.prazashop;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 /**
  * The type Praza shop application.
  */
 @SpringBootApplication
+@EnableAspectJAutoProxy
 public class PrazaShopApplication {
 
     /**

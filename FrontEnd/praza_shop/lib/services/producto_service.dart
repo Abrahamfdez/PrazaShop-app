@@ -44,12 +44,22 @@ class ProductoService {
     if (res.statusCode != 200 && res.statusCode != 204) throw Exception('Delete producto failed: ${res.statusCode} ${res.body}');
   }
   Future<List<ProductoDto>> getByNegocioId(int negocioId) async {
-  final uri = Uri.parse('${api.baseUrl}/api/productos/negocio/$negocioId');
-  final res = await http.get(uri, headers: api.headers(jsonBody: false));
-  if (res.statusCode == 200) {
-    final data = json.decode(res.body) as List<dynamic>;
-    return data.map((e) => ProductoDto.fromJson(e as Map<String, dynamic>)).toList();
+    final uri = Uri.parse('${api.baseUrl}/api/productos/negocio/$negocioId');
+    final res = await http.get(uri, headers: api.headers(jsonBody: false));
+    if (res.statusCode == 200) {
+      final data = json.decode(res.body) as List<dynamic>;
+      return data.map((e) => ProductoDto.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    throw Exception('Get productos by negocio failed: ${res.statusCode} ${res.body}');
   }
-  throw Exception('Get productos by negocio failed: ${res.statusCode} ${res.body}');
-}
+
+  /// Obtiene los detalles de un producto incluyendo info del negocio y estadísticas
+  Future<Map<String, dynamic>> getProductoDetalles(int productoId) async {
+    final uri = Uri.parse('${api.baseUrl}/api/productos/$productoId/detalles');
+    final res = await http.get(uri, headers: api.headers(jsonBody: false));
+    if (res.statusCode == 200) {
+      return json.decode(res.body) as Map<String, dynamic>;
+    }
+    throw Exception('Get producto detalles failed: ${res.statusCode} ${res.body}');
+  }
 }

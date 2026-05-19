@@ -4,18 +4,18 @@
 
 | Sección | Endpoints | Estado |
 |---------|-----------|--------|
-| 🔐 Autenticación | 3 | ✅ Funcionales |
-| 📦 Productos | 5 | ✅ Funcionales |
+| 🔐 Autenticación | 4 | ✅ Funcionales |
+| 📦 Productos | 6 | ✅ Funcionales |
 | 👥 Clientes | 5 | ✅ Funcionales |
-| 🏢 Negocios | 5 | ✅ Funcionales |
-| 📋 Pedidos | 5 | ✅ Funcionales |
+| 🏢 Negocios | 6 | ✅ Funcionales |
+| 📋 Pedidos | 7 | ✅ Funcionales |
 | 📦 Detalles Pedidos | 5 | ✅ Funcionales |
 | 🔄 Compras Recurrentes | 5 | ✅ Funcionales |
 | ⭐ Valoraciones | 5 | ✅ Funcionales |
 | 👤 Usuarios | 5 | ✅ Funcionales |
 | 🧪 Test | 1 | ✅ Funcional |
 
-**Total: 44 Endpoints Funcionales**
+**Total: 49 Endpoints Funcionales (5 nuevos endpoints de optimización agregados)**
 
 ---
 
@@ -92,6 +92,46 @@ POST /api/auth/refresh
 
 ---
 
+### 4. Registro de Vendedor (Registro Atómico)
+```
+POST /api/auth/register-vendedor
+```
+**Descripción:** Crea un nuevo usuario con rol NEGOCIO y su negocio asociado en una sola transacción atómica. 
+**Autenticación:** No requerida
+**Request:**
+```json
+{
+  "email": "vendedor@example.com",
+  "contraseña": "password123",
+  "nombreNegocio": "Mi Tienda Online",
+  "descripcion": "Descripción de la tienda"
+}
+```
+**Response:**
+```json
+{
+  "usuario": {
+    "id": 1,
+    "nome": "vendedor@example.com",
+    "email": "vendedor@example.com",
+    "tipoUsuario": "NEGOCIO"
+  },
+  "negocio": {
+    "id": 1,
+    "nomeNegocio": "Mi Tienda Online",
+    "descricion": "Descripción de la tienda",
+    "usuarioId": 1
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+**Errores:**
+- `400 Bad Request`: Email ya existe
+- `422 Unprocessable Entity`: Datos inválidos
+
+---
+
 ## 📦 PRODUCTOS
 
 ### 1. Obtener todos los productos
@@ -144,6 +184,37 @@ PUT /api/productos/{id}
 DELETE /api/productos/{id}
 ```
 **Autenticación:** Requerida ✔️
+
+---
+
+### 6. Obtener detalles del producto con negocio y valoraciones
+```
+GET /api/productos/{id}/detalles
+```
+**Descripción:** Obtiene el producto con información completa del negocio propietario y estadísticas de valoraciones en una sola llamada.
+**Autenticación:** No requerida
+**Response:**
+```json
+{
+  "producto": {
+    "id": 1,
+    "nome": "Laptop Gaming",
+    "prezo": 999.99,
+    "descricion": "Laptop potente para gaming",
+    "stock": 10,
+    "negocioId": 1
+  },
+  "negocio": {
+    "id": 1,
+    "nomeNegocio": "TechStore",
+    "descricion": "Tienda de tecnología"
+  },
+  "stats": {
+    "ratingPromedio": 4.5,
+    "cantidadValoraciones": 24
+  }
+}
+```
 
 ---
 
@@ -253,6 +324,53 @@ DELETE /api/negocios/{id}
 
 ---
 
+### 6. Obtener Dashboard del Negocio (Consolidado)
+```
+GET /api/negocios/{id}/dashboard
+```
+**Descripción:** Obtiene el dashboard completo del negocio con información consolidada: datos del negocio, últimos 10 productos, últimos 10 pedidos y estadísticas (rating, total de ventas, ingresos totales, cantidad de valoraciones). Solo el propietario del negocio puede acceder a su dashboard.
+**Autenticación:** Requerida ✔️ (Solo propietario)
+**Response:**
+```json
+{
+  "negocio": {
+    "id": 1,
+    "nomeNegocio": "TechStore",
+    "descricion": "Tienda de tecnología online",
+    "usuarioId": 1
+  },
+  "productos": [
+    {
+      "id": 1,
+      "nome": "Laptop Gaming",
+      "prezo": 999.99,
+      "stock": 10
+    }
+  ],
+  "pedidosRecientes": [
+    {
+      "id": 1,
+      "clienteId": 2,
+      "total": 999.99,
+      "estado": "ENTREGADO",
+      "dataPedido": "2024-01-15T10:30:00"
+    }
+  ],
+  "stats": {
+    "ratingPromedio": 4.7,
+    "totalVentasCount": 45,
+    "ingresosTotales": 44995.55,
+    "cantidadValoraciones": 32
+  }
+}
+```
+**Errores:**
+- `401 Unauthorized`: No autenticado
+- `403 Forbidden`: No es propietario del negocio
+- `404 Not Found`: Negocio no encontrado
+
+---
+
 ## 📋 PEDIDOS
 
 ### 1. Obtener todos los pedidos
@@ -301,6 +419,96 @@ PUT /api/pedidos/{id}
 DELETE /api/pedidos/{id}
 ```
 **Autenticación:** Requerida ✔️
+
+---
+
+### 6. Crear Pedido Completo (Atómico)
+```
+POST /api/pedidos/crear-completo
+```
+**Descripción:** Crea un pedido con todos sus detalles en una sola transacción atómica. Valida automáticamente que el cliente y negocio existan, que hay stock suficiente, y calcula el total automáticamente.
+**Autenticación:** Requerida ✔️
+**Request:**
+```json
+{
+  "clienteId": 2,
+  "negocioId": 1,
+  "detalles": [
+    {
+      "productoId": 1,
+      "cantidad": 2
+    },
+    {
+      "productoId": 3,
+      "cantidad": 1
+    }
+  ]
+}
+```
+**Response:**
+```json
+{
+  "idPedido": 1,
+  "clienteId": 2,
+  "negocioId": 1,
+  "total": 2029.97,
+  "estado": "PENDIENTE",
+  "detalles": [
+    {
+      "id": 1,
+      "productoId": 1,
+      "cantidade": 2,
+      "prezoUnitario": 999.99
+    }
+  ]
+}
+```
+**Errores:**
+- `404 Not Found`: Cliente o negocio no encontrado
+- `400 Bad Request`: Stock insuficiente o producto no encontrado
+- `422 Unprocessable Entity`: Datos inválidos
+
+---
+
+### 7. Buscar Pedidos (Con Filtros y Paginación)
+```
+GET /api/pedidos/buscar?estado=PENDIENTE&fechaDesde=2024-01-01T00:00:00&fechaHasta=2024-12-31T23:59:59&precioDesde=0&precioHasta=1000&ordenar=fecha_desc&pagina=0&tamaño=10
+```
+**Descripción:** Busca pedidos con múltiples filtros opcionales, soporte a paginación y ordenamiento. Incluye rate limiting de 100 peticiones por minuto.
+**Autenticación:** Requerida ✔️
+**Query Parameters:**
+- `estado` (opcional): PENDIENTE, CONFIRMADO, ENTREGADO, CANCELADO
+- `fechaDesde` (opcional): Formato ISO-8601 (yyyy-MM-dd'T'HH:mm:ss)
+- `fechaHasta` (opcional): Formato ISO-8601
+- `precioDesde` (opcional): Precio mínimo
+- `precioHasta` (opcional): Precio máximo
+- `ordenar` (opcional): fecha_asc, fecha_desc, total_asc, total_desc (default: fecha_desc)
+- `pagina` (optional, default: 0): Número de página
+- `tamaño` (optional, default: 10): Elementos por página
+
+**Response:**
+```json
+{
+  "content": [
+    {
+      "id": 1,
+      "clienteId": 2,
+      "negocioId": 1,
+      "total": 999.99,
+      "estado": "ENTREGADO",
+      "dataPedido": "2024-01-15T10:30:00"
+    }
+  ],
+  "pageNumber": 0,
+  "pageSize": 10,
+  "totalElements": 45,
+  "totalPages": 5,
+  "last": false
+}
+```
+**Errores:**
+- `429 Too Many Requests`: Límite de rate limiting excedido (>100 peticiones/minuto)
+- `400 Bad Request`: Filtros inválidos
 
 ---
 

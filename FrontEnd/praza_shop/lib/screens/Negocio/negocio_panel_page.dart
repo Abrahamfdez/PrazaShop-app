@@ -4,8 +4,6 @@ import 'package:praza_shop/models/producto_dto.dart';
 import 'package:praza_shop/services/api_service.dart';
 import 'package:praza_shop/services/negocio_service.dart';
 import 'package:praza_shop/services/producto_service.dart';
-import 'package:praza_shop/services/pedido_service.dart';
-import 'package:praza_shop/services/valoracion_service.dart';
 import 'package:praza_shop/utils/api_utils.dart';
 import 'package:praza_shop/screens/Negocio/crear_producto_page.dart';
 import 'package:praza_shop/screens/Negocio/editar_producto_page.dart';
@@ -27,8 +25,6 @@ class NegocioPanelPage extends StatefulWidget {
 class _NegocioPanelPageState extends State<NegocioPanelPage> {
   late NegocioService _negocioService;
   late ProductoService _productoService;
-  late PedidoService _pedidoService;
-  late ValoracionService _valoracionService;
 
   NegocioDto? _negocio;
   List<ProductoDto> _productos = [];
@@ -41,12 +37,10 @@ class _NegocioPanelPageState extends State<NegocioPanelPage> {
     super.initState();
     _negocioService = NegocioService(widget.api);
     _productoService = ProductoService(widget.api);
-    _pedidoService = PedidoService(widget.api);
-    _valoracionService = ValoracionService(widget.api);
     _cargarDatos();
   }
 
-  /// Carga todos los datos del negocio
+  /// Carga todos los datos del negocio usando el nuevo endpoint consolidado
   Future<void> _cargarDatos() async {
     try {
       // Obtener usuario actual
@@ -55,31 +49,33 @@ class _NegocioPanelPageState extends State<NegocioPanelPage> {
       // Obtener negocio del usuario
       final negocio = await _negocioService.getByUsuarioId(usuario.id!);
 
-      // Obtener productos del negocio
-      final productos = await _productoService.getByNegocioId(negocio.id!);
-
-      // Obtener estadísticas (vendas y valoración)
-      int totalVendas = 0;
-      double mediaVal = 0.0;
-
-      try {
-        final pedidos = await _pedidoService.findByNegocioId(negocio.id!);
-        totalVendas = pedidos.length;
-      } catch (e) {
-        print('Error al obtener vendas: $e');
-      }
-
-      try {
-        // Obtener promedio de valoraciones
-        final estadisticas = await _valoracionService.getEstadisticasByNegocioId(negocio.id!);
-        mediaVal = estadisticas.mediaPuntuacion ?? 0.0;
-      } catch (e) {
-        print('Error al obtener valoraciones: $e');
-      }
+      // Obtener dashboard completo (negocio, productos, pedidos y stats en una sola llamada)
+      final dashboard = await _negocioService.getDashboard(negocio.id!);
+      
+      final negocioData = dashboard['negocio'] as Map<String, dynamic>?
+          ?? {'id': negocio.id, 'nomeNegocio': negocio.nomeNegocio};
+      final productosData = (dashboard['productos'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>();
+      final statsData = dashboard['stats'] as Map<String, dynamic>? ?? {};
+      
+      // Convertir datos a DTOs
+      final negocioFromDash = NegocioDto(
+        id: negocioData['id'],
+        nomeNegocio: negocioData['nomeNegocio'],
+        direccion: negocioData['direccion'],
+        descricion: negocioData['descricion'],
+        usuarioId: negocioData['usuarioId'],
+      );
+      
+      final productosFromDash = productosData
+          .map((p) => ProductoDto.fromJson(p))
+          .toList();
+      
+      final totalVendas = statsData['totalVentasCount'] as int? ?? 0;
+      final mediaVal = (statsData['ratingPromedio'] as num? ?? 0.0).toDouble();
 
       setState(() {
-        _negocio = negocio;
-        _productos = productos;
+        _negocio = negocioFromDash;
+        _productos = productosFromDash;
         _totalVendas = totalVendas;
         _mediaValoracion = mediaVal;
         _isLoading = false;

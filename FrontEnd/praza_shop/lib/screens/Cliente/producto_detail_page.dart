@@ -5,6 +5,7 @@ import 'package:praza_shop/models/valoracion_estadisticas_dto.dart';
 import 'package:praza_shop/services/api_service.dart';
 import 'package:praza_shop/services/negocio_service.dart';
 import 'package:praza_shop/services/valoracion_service.dart';
+import 'package:praza_shop/services/producto_service.dart';
 import 'package:praza_shop/screens/Cliente/comprar_page.dart';
 
 /// Pantalla de detalle de producto con información completa
@@ -25,6 +26,7 @@ class ProductoDetailPage extends StatefulWidget {
 class _ProductoDetailPageState extends State<ProductoDetailPage> {
   late NegocioService _negocioService;
   late ValoracionService _valoracionService;
+  late ProductoService _productoService;
   NegocioDto? _negocio;
   ValoracionEstadisticasDto? _estadisticas;
   bool _isLoading = true;
@@ -34,10 +36,11 @@ class _ProductoDetailPageState extends State<ProductoDetailPage> {
     super.initState();
     _negocioService = NegocioService(widget.api);
     _valoracionService = ValoracionService(widget.api);
+    _productoService = ProductoService(widget.api);
     _cargarDatos();
   }
 
-  /// Carga la información del negocio y sus estadísticas
+  /// Carga la información del producto con detalles del negocio y stats en una sola llamada
   Future<void> _cargarDatos() async {
     if (widget.producto.negocioId == null) {
       setState(() {
@@ -47,19 +50,43 @@ class _ProductoDetailPageState extends State<ProductoDetailPage> {
     }
 
     try {
-      final negocio = await _negocioService.getById(widget.producto.negocioId!);
-      final estadisticas =
-          await _valoracionService.getEstadisticasByNegocioId(widget.producto.negocioId!);
+      // Usar el nuevo endpoint que devuelve producto + negocio + stats consolidados
+      final detalles = await _productoService.getProductoDetalles(widget.producto.id!);
+      
+      final negocioData = detalles['negocio'] as Map<String, dynamic>? ?? {};
+      final statsData = detalles['stats'] as Map<String, dynamic>? ?? {};
+      
+      final negocio = NegocioDto(
+        id: negocioData['id'],
+        nomeNegocio: negocioData['nomeNegocio'],
+        descricion: negocioData['descricion'],
+      );
+      
       setState(() {
         _negocio = negocio;
-        _estadisticas = estadisticas;
+        _estadisticas = ValoracionEstadisticasDto(
+          mediaPuntuacion: (statsData['ratingPromedio'] as num? ?? 0.0).toDouble(),
+          cantidadValoraciones: statsData['cantidadValoraciones'] as int? ?? 0,
+        );
         _isLoading = false;
       });
     } catch (e) {
-      print('Error al cargar datos: $e');
-      setState(() {
-        _isLoading = false;
-      });
+      print('Error al cargar detalles del producto: $e');
+      // Fallback: cargar datos por separado si el nuevo endpoint falla
+      try {
+        final negocio = await _negocioService.getById(widget.producto.negocioId!);
+        final estadisticas = await _valoracionService.getEstadisticasByNegocioId(widget.producto.negocioId!);
+        setState(() {
+          _negocio = negocio;
+          _estadisticas = estadisticas;
+          _isLoading = false;
+        });
+      } catch (fallbackError) {
+        print('Error en fallback: $fallbackError');
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

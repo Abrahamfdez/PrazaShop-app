@@ -51,4 +51,14 @@ class NegocioService {
     final res = await http.delete(uri, headers: api.headers(jsonBody: false));
     if (res.statusCode != 200 && res.statusCode != 204) throw Exception('Delete negocio failed: ${res.statusCode} ${res.body}');
   }
+
+  /// Obtiene el dashboard completo de un negocio con estadísticas
+  Future<Map<String, dynamic>> getDashboard(int negocioId) async {
+    final uri = Uri.parse('${api.baseUrl}/api/negocios/$negocioId/dashboard');
+    final res = await http.get(uri, headers: api.headers(jsonBody: false));
+    if (res.statusCode == 200) {
+      return json.decode(res.body) as Map<String, dynamic>;
+    }
+    throw Exception('Get dashboard failed: ${res.statusCode} ${res.body}');
+  }
 }

@@ -7,7 +7,10 @@ import org.example.prazashop.auth.requets.RegisterRequest;
 import org.example.prazashop.auth.requets.TokenResponse;
 import org.example.prazashop.auth.service.AuthService;
 import org.example.prazashop.exception.BadRequestException;
+import org.example.prazashop.model.dto.VendedorRegistroRequest;
+import org.example.prazashop.model.dto.VendedorRegistroResponse;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -64,6 +67,18 @@ public class AuthController {
             throw new BadRequestException("Falta refresh token en header Authorization o en body {\"refreshToken\": \"...\"}");
         }
         return ResponseEntity.ok(authService.refreshToken(token));
+    }
+
+    /**
+     * Registra un nuevo vendedor (usuario + negocio) en transacción atómica.
+     *
+     * @param request datos del vendedor
+     * @return response con usuario, negocio y tokens
+     */
+    @PostMapping("/register-vendedor")
+    public ResponseEntity<VendedorRegistroResponse> registrarVendedor(@RequestBody VendedorRegistroRequest request) {
+        VendedorRegistroResponse response = authService.registrarVendedor(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 }

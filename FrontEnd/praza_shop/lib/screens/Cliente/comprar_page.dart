@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:praza_shop/models/detalle_pedido_dto.dart';
 import 'package:praza_shop/models/pedido_dto.dart';
 import 'package:praza_shop/models/producto_dto.dart';
 import 'package:praza_shop/models/negocio_dto.dart';
 import 'package:praza_shop/screens/Cliente/valoracion_compra_page.dart';
 import 'package:praza_shop/services/api_service.dart';
 import 'package:praza_shop/services/cliente_service.dart';
-import 'package:praza_shop/services/detalle_pedido_service.dart';
 import 'package:praza_shop/services/negocio_service.dart';
 import 'package:praza_shop/services/pedido_service.dart';
 import 'package:praza_shop/utils/api_utils.dart';
@@ -88,61 +86,72 @@ class _ComprarPageState extends State<ComprarPage> {
     }
   }
 
-  /// Confirma la compra
+  /// Confirma la compra usando el nuevo endpoint atómico crear-completo
   Future<void> _confirmarCompra() async {
-    try{
-    // Obtener usuario actual
-    final usuario = await ApiUtils.getUserFromToken(widget.api, widget.api.token);
-    
-    // Obtener cliente asociado al usuario
-    final cliente = await ClienteService(widget.api).getByUsuarioId(usuario.id!);
-    
-    // Crear el pedido
-    PedidoDto pedido = PedidoDto(
-      negocioId: widget.producto.negocioId!,
-      clienteId: cliente.id!,
-      total: _total,
-      estado: 'PENDIENTE',
-      dataCancelacion: null,
-      dataConfirmacion: null,
-      dataEntrega: null,
-      dataPedido: DateTime.now(),
-    );
+    try {
+      setState(() => _isLoading = true);
+      
+      // Obtener usuario actual
+      final usuario = await ApiUtils.getUserFromToken(widget.api, widget.api.token);
+      
+      // Obtener cliente asociado al usuario
+      final cliente = await ClienteService(widget.api).getByUsuarioId(usuario.id!);
+      
+      // Usar el nuevo endpoint que crea pedido + detalles en transacción atómica
+      final pedidoConDetalles = await PedidoService(widget.api).crearPedidoCompleto(
+        clienteId: cliente.id!,
+        negocioId: widget.producto.negocioId!,
+        detalles: [
+          {
+            'productoId': widget.producto.id!,
+            'cantidad': _cantidad,
+          }
+        ],
+      );
 
-    var pedidoCreated=await PedidoService(widget.api).create(pedido);
-    
-    // Crear el detalle del pedido
-    DetallePedidoDto detalle = DetallePedidoDto(
-      productoId: widget.producto.id!,
-      cantidade: _cantidad,
-      prezoUnitario: widget.producto.prezo ?? 0.0,
-      pedidoId: pedidoCreated.id!, 
-    );
-    var detalleCreated=await DetallePedidoService(widget.api).create(detalle);
-    Navigator.of(context).pop();
-    // Navegar a la página de valoración
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => ValoracionCompraPage(
-          pedido: pedidoCreated,
-          producto: widget.producto,
-          negocio: _negocio ?? NegocioDto(),
-          api: widget.api,
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Compra de $_cantidad ${_cantidad == 1 ? 'unidad' : 'unidades'} confirmada. Total: ${_total.toStringAsFixed(2)}€',
+          ),
+          duration: const Duration(seconds: 2),
         ),
-      ),
-    );
-    }catch(e){
+      );
+
+      Navigator.of(context).pop();
+      
+      // Navegar a la página de valoración
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ValoracionCompraPage(
+            pedido: PedidoDto(
+              id: pedidoConDetalles.idPedido?.toInt(),
+              clienteId: cliente.id,
+              negocioId: widget.producto.negocioId,
+              total: _total,
+              estado: 'PENDIENTE',
+              dataPedido: DateTime.now(),
+            ),
+            producto: widget.producto,
+            negocio: _negocio ?? NegocioDto(),
+            api: widget.api,
+          ),
+        ),
+      );
+    } catch (e) {
       print('Error al confirmar compra: $e');
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Compra de $_cantidad ${_cantidad == 1 ? 'unidad' : 'unidades'} confirmada. Total: ${_total.toStringAsFixed(2)}€',
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al confirmar compra: $e'),
+          backgroundColor: Colors.red,
         ),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-    
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override

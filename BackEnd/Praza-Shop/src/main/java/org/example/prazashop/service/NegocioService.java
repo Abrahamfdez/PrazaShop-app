@@ -57,4 +57,21 @@ public interface NegocioService {
      * @throws NoContentException si no se encuentra el negocio
      */
     NegocioDto findByUsuarioId(Long usuarioId);
+
+    /**
+     * Obtiene el dashboard completo de un negocio con estadísticas.
+     *
+     * @param negocioId id del negocio
+     * @return dashboard con negocio, productos, pedidos recientes y estadísticas
+     */
+    org.example.prazashop.model.dto.NegocioDashboardDto getDashboard(Long negocioId);
+
+    /**
+     * Verifica si un usuario (por email) es propietario del negocio.
+     *
+     * @param negocioId id del negocio
+     * @param email email del usuario a verificar
+     * @return true si el usuario es propietario, false en caso contrario
+     */
+    boolean isOwnerOfNegocio(Long negocioId, String email);
 }

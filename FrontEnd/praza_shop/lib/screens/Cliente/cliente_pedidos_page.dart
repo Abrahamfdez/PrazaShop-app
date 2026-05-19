@@ -32,11 +32,25 @@ class _ClientePedidosPageState extends State<ClientePedidosPage> {
     _pedidosFuture = _cargarPedidos();
   }
 
-  /// Carga los pedidos del cliente desde la API
+  /// Carga los pedidos del cliente usando el nuevo endpoint buscarPedidos con soporte a paginación
   Future<List<PedidoConDetallesDto>> _cargarPedidos() async {
     try {
       var cliente = await ClienteService(widget.api).getByUsuarioId(widget.usuario.id!);
-      final pedidos = await _pedidoService.findByClienteIdConDetalles(cliente.id!);
+      
+      // Usar el nuevo endpoint buscarPedidos que devuelve paginado
+      // Por ahora cargamos todos con un tamaño grande
+      final resultado = await _pedidoService.buscarPedidos(
+        pagina: 0, // Pagina 0 (basada en 0)
+        tamano: 100,
+        ordenar: 'fecha_desc', // Mostrar mas recientes primero
+      );
+      
+      // El resultado es un Map con 'content' que contiene los pedidos
+      final content = resultado['content'] as List<dynamic>? ?? [];
+      final pedidos = content
+          .map((p) => PedidoConDetallesDto.fromJson(p as Map<String, dynamic>))
+          .toList();
+      
       return pedidos;
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

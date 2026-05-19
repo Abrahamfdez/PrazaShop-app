@@ -54,4 +54,12 @@ public interface ProductoService {
      * @return lista de productos del negocio
      */
     List<ProductoDto> findByNegocioId(Long negocioId);
+
+    /**
+     * Obtiene los detalles de un producto incluyendo info del negocio y estadísticas.
+     *
+     * @param productoId id del producto
+     * @return producto con detalles del negocio y stats
+     */
+    org.example.prazashop.model.dto.ProductoDetallesDto getProductoDetalles(Long productoId);
 }

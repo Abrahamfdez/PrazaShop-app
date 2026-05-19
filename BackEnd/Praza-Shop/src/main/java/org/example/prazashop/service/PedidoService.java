@@ -72,4 +72,36 @@ public interface PedidoService {
      * @return lista de pedidos
      */
     List<PedidoDto> findByNegocioId(Long negocioId);
+
+    /**
+     * Crea un pedido completo con detalles en una transacción atómica.
+     *
+     * @param request request con clienteId, negocioId y detalles
+     * @return el pedido creado con detalles
+     */
+    PedidoConDetallesDto crearPedidoCompleto(org.example.prazashop.model.dto.PedidoCreacionRequest request);
+
+    /**
+     * Busca pedidos con filtros y paginación.
+     *
+     * @param estado estado del pedido (opcional)
+     * @param fechaDesde fecha mínima (opcional)
+     * @param fechaHasta fecha máxima (opcional)
+     * @param precioDesde precio mínimo (opcional)
+     * @param precioHasta precio máximo (opcional)
+     * @param ordenar criterio de ordenamiento: fecha_asc, fecha_desc, total_asc, total_desc
+     * @param pagina número de página (0-indexed)
+     * @param tamaño cantidad de resultados por página
+     * @return response con paginación
+     */
+    org.example.prazashop.model.dto.PedidoSearchResponse buscarPedidos(
+            String estado,
+            java.time.LocalDateTime fechaDesde,
+            java.time.LocalDateTime fechaHasta,
+            Double precioDesde,
+            Double precioHasta,
+            String ordenar,
+            Integer pagina,
+            Integer tamaño
+    );
 }

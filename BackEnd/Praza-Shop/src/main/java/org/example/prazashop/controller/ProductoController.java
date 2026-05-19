@@ -1,6 +1,7 @@
 package org.example.prazashop.controller;
 
 import org.example.prazashop.model.dto.ProductoDto;
+import org.example.prazashop.model.dto.ProductoDetallesDto;
 import org.example.prazashop.service.ProductoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -100,5 +101,17 @@ public class ProductoController {
     public ResponseEntity<List<ProductoDto>> getProductosByNegocio(@PathVariable Long negocioId) {
         List<ProductoDto> productos = productoService.findByNegocioId(negocioId);
         return ResponseEntity.ok(productos);
+    }
+
+    /**
+     * Obtiene los detalles de un producto incluyendo info del negocio y estadísticas.
+     *
+     * @param id identificador del producto
+     * @return producto con detalles del negocio y stats
+     */
+    @GetMapping("/{id}/detalles")
+    public ResponseEntity<ProductoDetallesDto> getProductoDetalles(@PathVariable Long id) {
+        ProductoDetallesDto detalles = productoService.getProductoDetalles(id);
+        return ResponseEntity.ok(detalles);
     }
 }

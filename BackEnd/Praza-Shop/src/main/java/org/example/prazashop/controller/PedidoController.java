@@ -2,11 +2,15 @@ package org.example.prazashop.controller;
 
 import org.example.prazashop.model.dto.PedidoDto;
 import org.example.prazashop.model.dto.PedidoConDetallesDto;
+import org.example.prazashop.model.dto.PedidoCreacionRequest;
+import org.example.prazashop.model.dto.PedidoSearchResponse;
 import org.example.prazashop.service.PedidoService;
+import org.example.prazashop.confg.ratelimit.RateLimit;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -119,5 +123,66 @@ public class PedidoController {
     public ResponseEntity<List<PedidoDto>> getPedidosByNegocioId(@PathVariable Long negocioId) {
         List<PedidoDto> pedidos = pedidoService.findByNegocioId(negocioId);
         return ResponseEntity.ok(pedidos);
+    }
+
+    /**
+     * Crea un pedido completo con detalles en una transacción atómica.
+     *
+     * @param request request con clienteId, negocioId y detalles
+     * @return pedido creado con detalles
+     */
+    @PostMapping("/crear-completo")
+    public ResponseEntity<PedidoConDetallesDto> crearPedidoCompleto(@RequestBody PedidoCreacionRequest request) {
+        PedidoConDetallesDto pedidoCreado = pedidoService.crearPedidoCompleto(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(pedidoCreado);
+    }
+
+    /**
+     * Busca pedidos con filtros y paginación.
+     *
+     * @param estado estado del pedido (opcional)
+     * @param fechaDesde fecha mínima (opcional, formato: yyyy-MM-dd'T'HH:mm:ss)
+     * @param fechaHasta fecha máxima (opcional, formato: yyyy-MM-dd'T'HH:mm:ss)
+     * @param precioDesde precio mínimo (opcional)
+     * @param precioHasta precio máximo (opcional)
+     * @param ordenar criterio de ordenamiento (opcional: fecha_asc, fecha_desc, total_asc, total_desc)
+     * @param pagina número de página (0-indexed, default: 0)
+     * @param tamaño cantidad de resultados por página (default: 10)
+     * @return response con pedidos paginados
+     */
+    @RateLimit(requestsPerMinute = 100) // Límite de 100 peticiones por minuto por usuario
+    @GetMapping("/buscar")
+    public ResponseEntity<PedidoSearchResponse> buscarPedidos(
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) String fechaDesde,
+            @RequestParam(required = false) String fechaHasta,
+            @RequestParam(required = false) Double precioDesde,
+            @RequestParam(required = false) Double precioHasta,
+            @RequestParam(required = false, defaultValue = "fecha_desc") String ordenar,
+            @RequestParam(required = false, defaultValue = "0") Integer pagina,
+            @RequestParam(required = false, defaultValue = "10") Integer tamaño) {
+
+        // Convertir strings a LocalDateTime si están presentes
+        LocalDateTime fechaDesdeLocal = null;
+        LocalDateTime fechaHastaLocal = null;
+        
+        if (fechaDesde != null && !fechaDesde.isEmpty()) {
+            fechaDesdeLocal = LocalDateTime.parse(fechaDesde);
+        }
+        if (fechaHasta != null && !fechaHasta.isEmpty()) {
+            fechaHastaLocal = LocalDateTime.parse(fechaHasta);
+        }
+
+        PedidoSearchResponse resultado = pedidoService.buscarPedidos(
+                estado,
+                fechaDesdeLocal,
+                fechaHastaLocal,
+                precioDesde,
+                precioHasta,
+                ordenar,
+                pagina,
+                tamaño
+        );
+        return ResponseEntity.ok(resultado);
     }
 }

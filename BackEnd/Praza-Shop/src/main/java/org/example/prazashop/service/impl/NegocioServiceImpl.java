@@ -5,11 +5,19 @@ import org.example.prazashop.exception.NoContentException;
 import org.example.prazashop.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.prazashop.model.dto.NegocioDto;
+import org.example.prazashop.model.dto.NegocioDashboardDto;
+import org.example.prazashop.model.dto.ProductoDto;
+import org.example.prazashop.model.dto.PedidoDto;
 import org.example.prazashop.model.entity.Negocio;
 import org.example.prazashop.model.entity.Usuario;
 import org.example.prazashop.repository.NegocioRepository;
 import org.example.prazashop.repository.UsuarioRepository;
+import org.example.prazashop.repository.ProductoRepository;
+import org.example.prazashop.repository.PedidoRepository;
 import org.example.prazashop.service.NegocioService;
+import org.example.prazashop.service.ProductoService;
+import org.example.prazashop.service.PedidoService;
+import org.example.prazashop.service.ValoracionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -26,6 +34,11 @@ public class NegocioServiceImpl implements NegocioService {
 
     private final NegocioRepository negocioRepository;
     private final UsuarioRepository usuarioRepository;
+    private final ProductoRepository productoRepository;
+    private final PedidoRepository pedidoRepository;
+    private final ProductoService productoService;
+    private final PedidoService pedidoService;
+    private final ValoracionService valoracionService;
 
     @Override
     @Transactional(readOnly = true)
@@ -109,5 +122,62 @@ public class NegocioServiceImpl implements NegocioService {
         if (!StringUtils.hasText(dto.getDireccion())) {
             throw new BadRequestException("direccion es obligatoria");
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public NegocioDashboardDto getDashboard(Long negocioId) {
+        // Obtener negocio
+        Negocio negocio = negocioRepository.findById(negocioId)
+                .orElseThrow(() -> new NotFoundException("Negocio no encontrado con id " + negocioId));
+
+        // Obtener últimos 10 productos
+        List<ProductoDto> productos = productoService.findByNegocioId(negocioId).stream()
+                .limit(10)
+                .toList();
+
+        // Obtener últimos 10 pedidos
+        List<PedidoDto> pedidosRecientes = pedidoService.findByNegocioId(negocioId).stream()
+                .limit(10)
+                .toList();
+
+        // Calcular estadísticas
+        Double ratingPromedio = valoracionService.getAveragePuntuacionByNegocioId(negocioId);
+        Long cantidadValoraciones = valoracionService.getCountValoracionesByNegocioId(negocioId);
+        
+        // Calcular ingresos totales
+        Double ingresosTotales = pedidoService.findByNegocioId(negocioId).stream()
+                .mapToDouble(p -> p.getTotal() != null ? p.getTotal() : 0.0)
+                .sum();
+
+        // Construir dashboard
+        return NegocioDashboardDto.builder()
+                .negocio(toDto(negocio))
+                .productos(productos)
+                .pedidosRecientes(pedidosRecientes)
+                .stats(NegocioDashboardDto.DashboardStats.builder()
+                        .ratingPromedio(ratingPromedio != null ? ratingPromedio : 0.0)
+                        .totalVentasCount(pedidosRecientes.size())
+                        .ingresosTotales(ingresosTotales)
+                        .cantidadValoraciones(cantidadValoraciones != null ? cantidadValoraciones.intValue() : 0)
+                        .build())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isOwnerOfNegocio(Long negocioId, String email) {
+        // Obtener negocio
+        Negocio negocio = negocioRepository.findById(negocioId)
+                .orElseThrow(() -> new NotFoundException("Negocio no encontrado con id " + negocioId));
+        
+        // Obtener usuario propietario del negocio
+        Usuario usuario = negocio.getUsuario();
+        if (usuario == null) {
+            throw new NotFoundException("Usuario propietario no encontrado");
+        }
+        
+        // Verificar si el email coincide
+        return usuario.getEmail().equalsIgnoreCase(email);
     }
 }

@@ -5,11 +5,13 @@ import org.example.prazashop.exception.NoContentException;
 import org.example.prazashop.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.example.prazashop.model.dto.ProductoDto;
+import org.example.prazashop.model.dto.ProductoDetallesDto;
 import org.example.prazashop.model.entity.Negocio;
 import org.example.prazashop.model.entity.Producto;
 import org.example.prazashop.repository.NegocioRepository;
 import org.example.prazashop.repository.ProductoRepository;
 import org.example.prazashop.service.ProductoService;
+import org.example.prazashop.service.ValoracionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -27,6 +29,7 @@ public class ProductoServiceImpl implements ProductoService {
 
     private final ProductoRepository productoRepository;
     private final NegocioRepository negocioRepository;
+    private final ValoracionService valoracionService;
 
     @Override
     @Transactional(readOnly = true)
@@ -130,5 +133,37 @@ public class ProductoServiceImpl implements ProductoService {
         if (dto.getStock() == null || dto.getStock() < 0) {
             throw new BadRequestException("stock debe ser mayor o igual a 0");
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProductoDetallesDto getProductoDetalles(Long productoId) {
+        // Obtener producto
+        Producto producto = productoRepository.findById(productoId)
+                .orElseThrow(() -> new NotFoundException("Producto no encontrado con id " + productoId));
+
+        // Obtener negocio asociado
+        Negocio negocio = producto.getNegocio();
+        if (negocio == null) {
+            throw new NotFoundException("El producto no tiene negocio asociado");
+        }
+
+        // Calcular estadísticas del negocio
+        Double ratingPromedio = valoracionService.getAveragePuntuacionByNegocioId(negocio.getIdNegocio());
+        Long cantidadValoraciones = valoracionService.getCountValoracionesByNegocioId(negocio.getIdNegocio());
+
+        // Construir respuesta
+        return ProductoDetallesDto.builder()
+                .producto(toDto(producto))
+                .negocio(ProductoDetallesDto.NegocioInfoDto.builder()
+                        .id(negocio.getIdNegocio())
+                        .nomeNegocio(negocio.getNomeNegocio())
+                        .descricion(negocio.getDescricion())
+                        .build())
+                .stats(ProductoDetallesDto.ProductoStats.builder()
+                        .ratingPromedio(ratingPromedio != null ? ratingPromedio : 0.0)
+                        .cantidadValoraciones(cantidadValoraciones != null ? cantidadValoraciones.intValue() : 0)
+                        .build())
+                .build();
     }
 }
