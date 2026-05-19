@@ -88,6 +88,96 @@ class _VentasPageState extends State<VentasPage> {
         return Colors.grey;
     }
   }
+  Future<void> _actualizarEstadoPedido(int id, String nuevoEstado) async {
+  try {
+    // Obtener el pedido actual de la lista
+    final pedidoActual = _pedidos.firstWhere((p) => p.id == id);
+    
+    // Crear una copia con el nuevo estado
+    final pedidoActualizado = PedidoDto(
+      id: pedidoActual.id,
+      clienteId: pedidoActual.clienteId,
+      negocioId: pedidoActual.negocioId,
+      dataPedido: pedidoActual.dataPedido,
+      dataConfirmacion: pedidoActual.dataConfirmacion,
+      dataEntrega: pedidoActual.dataEntrega,
+      dataCancelacion: pedidoActual.dataCancelacion,
+      estado: nuevoEstado,
+      total: pedidoActual.total,
+    );
+    
+    // Actualizar en el backend
+    await _pedidoService.update(id, pedidoActualizado);
+    
+    // Refrescar la lista
+    await _cargarPedidos();
+    
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Estado actualizado a: $nuevoEstado'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  } catch (e) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error al actualizar: $e'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+
+void _mostrarDialogoEstado(PedidoDto pedido) {
+  final estados = ['Pendiente', 'Confirmado', 'Entregado', 'Cancelado'];
+  
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Cambiar estado del pedido #${pedido.id}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Estado actual: ${pedido.estado}'),
+            const SizedBox(height: 20),
+            const Text('Selecciona el nuevo estado:'),
+            const SizedBox(height: 16),
+            ...estados.map((estado) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: estado.toLowerCase() == pedido.estado?.toLowerCase()
+                        ? _getEstadoButtonColor(estado)
+                        : Colors.grey[300],
+                    foregroundColor: estado.toLowerCase() == pedido.estado?.toLowerCase()
+                        ? Colors.white
+                        : Colors.black,
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _actualizarEstadoPedido(pedido.id!, estado);
+                  },
+                  child: Text(estado),
+                ),
+              ),
+            )).toList(),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -145,36 +235,48 @@ class _VentasPageState extends State<VentasPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Header con ID y estado
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Pedido #${pedido.id}',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: _getEstadoButtonColor(estado),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  estado,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: _getEstadoButtonColor(estado),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                          // Header con ID, estado y botón editar
+Row(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  children: [
+    Text(
+      'Pedido #${pedido.id}',
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 6,
+          ),
+          decoration: BoxDecoration(
+            color: _getEstadoButtonColor(estado),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            estado,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        IconButton(
+          icon: const Icon(Icons.edit, size: 18),
+          onPressed: () => _mostrarDialogoEstado(pedido),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+        ),
+      ],
+    ),
+  ],
+),
                           const SizedBox(height: 8),
 
                           // Fecha

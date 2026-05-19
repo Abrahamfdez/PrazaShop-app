@@ -113,29 +113,57 @@ public class PedidoServiceImpl implements PedidoService {
     }
 
     private void applyDto(Pedido pedido, PedidoDto dto) {
-        if (dto.getClienteId() != null) {
-            Cliente cliente = clienteRepository.findById(dto.getClienteId())
-                    .orElseThrow(() -> new NotFoundException("Cliente no encontrado con id " + dto.getClienteId()));
-            pedido.setCliente(cliente);
-        } else if (pedido.getCliente() == null) {
-            throw new BadRequestException("clienteId es obligatorio");
-        }
-
-        if (dto.getNegocioId() != null) {
-            Negocio negocio = negocioRepository.findById(dto.getNegocioId())
-                    .orElseThrow(() -> new NotFoundException("Negocio no encontrado con id " + dto.getNegocioId()));
-            pedido.setNegocio(negocio);
-        } else if (pedido.getNegocio() == null) {
-            throw new BadRequestException("negocioId es obligatorio");
-        }
-
-        pedido.setDataPedido(dto.getDataPedido());
-        pedido.setDataConfirmacion(dto.getDataConfirmacion());
-        pedido.setDataEntrega(dto.getDataEntrega());
-        pedido.setDataCancelacion(dto.getDataCancelacion());
-        pedido.setEstado(dto.getEstado());
-        pedido.setTotal(dto.getTotal());
+    if (dto.getClienteId() != null) {
+        Cliente cliente = clienteRepository.findById(dto.getClienteId())
+                .orElseThrow(() -> new NotFoundException("Cliente no encontrado con id " + dto.getClienteId()));
+        pedido.setCliente(cliente);
+    } else if (pedido.getCliente() == null) {
+        throw new BadRequestException("clienteId es obligatorio");
     }
+
+    if (dto.getNegocioId() != null) {
+        Negocio negocio = negocioRepository.findById(dto.getNegocioId())
+                .orElseThrow(() -> new NotFoundException("Negocio no encontrado con id " + dto.getNegocioId()));
+        pedido.setNegocio(negocio);
+    } else if (pedido.getNegocio() == null) {
+        throw new BadRequestException("negocioId es obligatorio");
+    }
+
+    pedido.setDataPedido(dto.getDataPedido());
+    
+    // Actualizar timestamps según el nuevo estado
+    String nuevoEstado = dto.getEstado();
+    String estadoAnterior = pedido.getEstado();
+    
+    if (nuevoEstado != null && !nuevoEstado.equals(estadoAnterior)) {
+        java.time.LocalDateTime ahora = java.time.LocalDateTime.now();
+        switch (nuevoEstado.toUpperCase()) {
+            case "CONFIRMADO":
+                pedido.setDataConfirmacion(ahora);
+                break;
+            case "ENTREGADO":
+                pedido.setDataEntrega(ahora);
+                break;
+            case "CANCELADO":
+                pedido.setDataCancelacion(ahora);
+                break;
+        }
+    }
+    
+    // Preservar timestamps existentes si no cambian
+    if (dto.getDataConfirmacion() != null) {
+        pedido.setDataConfirmacion(dto.getDataConfirmacion());
+    }
+    if (dto.getDataEntrega() != null) {
+        pedido.setDataEntrega(dto.getDataEntrega());
+    }
+    if (dto.getDataCancelacion() != null) {
+        pedido.setDataCancelacion(dto.getDataCancelacion());
+    }
+    
+    pedido.setEstado(nuevoEstado);
+    pedido.setTotal(dto.getTotal());
+}
 
     private void validateDto(PedidoDto dto) {
         if (dto == null) {

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'api_service.dart';
 import '../models/pedido_dto.dart';
+import '../models/pedido_con_detalles_dto.dart';
 
 class PedidoService {
   final ApiService api;
@@ -52,5 +53,25 @@ class PedidoService {
       return data.map((e) => PedidoDto.fromJson(e as Map<String, dynamic>)).toList();
     }
     throw Exception('Get pedidos by negocio failed: ${res.statusCode} ${res.body}');
+  }
+
+  Future<List<PedidoDto>> findByClienteId(int clienteId) async {
+    final uri = Uri.parse('${api.baseUrl}/api/pedidos/cliente/$clienteId');
+    final res = await http.get(uri, headers: api.headers(jsonBody: false));
+    if (res.statusCode == 200) {
+      final data = json.decode(res.body) as List<dynamic>;
+      return data.map((e) => PedidoDto.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    throw Exception('Get pedidos by cliente failed: ${res.statusCode} ${res.body}');
+  }
+
+  Future<List<PedidoConDetallesDto>> findByClienteIdConDetalles(int clienteId) async {
+    final uri = Uri.parse('${api.baseUrl}/api/pedidos/cliente/$clienteId/detalles');
+    final res = await http.get(uri, headers: api.headers(jsonBody: false));
+    if (res.statusCode == 200) {
+      final data = json.decode(res.body) as List<dynamic>;
+      return data.map((e) => PedidoConDetallesDto.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    throw Exception('Get pedidos with details by cliente failed: ${res.statusCode} ${res.body}');
   }
 }
