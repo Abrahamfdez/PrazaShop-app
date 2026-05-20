@@ -20,6 +20,7 @@ import org.example.prazashop.repository.PedidoRepository;
 import org.example.prazashop.repository.ProductoRepository;
 import org.example.prazashop.repository.DetallePedidoRepository;
 import org.example.prazashop.service.PedidoService;
+import org.example.prazashop.service.PedidoStateTransitionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -41,6 +42,7 @@ public class PedidoServiceImpl implements PedidoService {
     private final NegocioRepository negocioRepository;
     private final ProductoRepository productoRepository;
     private final DetallePedidoRepository detallePedidoRepository;
+    private final PedidoStateTransitionService stateTransitionService;
 
     @Override
     @Transactional(readOnly = true)
@@ -197,7 +199,8 @@ public class PedidoServiceImpl implements PedidoService {
         }
     }
 
-    private PedidoConDetallesDto toDtoConDetalles(Pedido pedido) {
+    @Override
+    public PedidoConDetallesDto toDtoConDetalles(Pedido pedido) {
         List<DetallePedidoConProductoDto> detalles = pedido.getDetalles() != null ?
                 pedido.getDetalles().stream()
                         .map(detalle -> DetallePedidoConProductoDto.builder()
@@ -263,12 +266,11 @@ public class PedidoServiceImpl implements PedidoService {
             detalles.add(detalle);
         }
 
-        // Crear pedido
+        // Crear pedido sin estado aún
         Pedido pedido = new Pedido();
         pedido.setCliente(cliente);
         pedido.setNegocio(negocio);
         pedido.setDataPedido(LocalDateTime.now());
-        pedido.setEstado("PENDIENTE");
         pedido.setTotal(total);
 
         // Guardar pedido
@@ -279,6 +281,15 @@ public class PedidoServiceImpl implements PedidoService {
             detalle.setPedido(pedidoGuardado);
             detallePedidoRepository.save(detalle);
         }
+
+        // Cargar detalles asociados (necesario para transitionToPendiente)
+        pedidoGuardado.setDetalles(detalles);
+
+        // Aplicar transición a PENDIENTE (valida stock y registra RESERVA)
+        stateTransitionService.transitionToPendiente(pedidoGuardado);
+
+        // Guardar el estado
+        pedidoRepository.save(pedidoGuardado);
 
         return toDtoConDetalles(pedidoGuardado);
     }
@@ -338,5 +349,12 @@ public class PedidoServiceImpl implements PedidoService {
                 .totalPages((ordenados.size() + tamaño - 1) / tamaño)
                 .last(end >= ordenados.size())
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Pedido findEntityById(Long id) {
+        return pedidoRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Pedido no encontrado con id " + id));
     }
 }

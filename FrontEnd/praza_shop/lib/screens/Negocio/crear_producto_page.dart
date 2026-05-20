@@ -70,15 +70,13 @@ class _CrearProductoPageState extends State<CrearProductoPage> {
     return null;
   }
 
-  /// Crea el producto en el backend
+  /// Crea el producto en el backend usando el nuevo endpoint user-scoped
   Future<void> _crearProducto() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
 
     try {
-      final usuario = await ApiUtils.getUserFromToken(widget.api, widget.api.token);
-      final negocio = await _negocioService.getByUsuarioId(usuario.id!);
-
+      // El nuevo endpoint auto-resuelve el negocioId del usuario autenticado
       final producto = ProductoDto(
         nome: _nombreCtl.text.trim(),
         descricion: _descripcionCtl.text.trim(),
@@ -86,10 +84,10 @@ class _CrearProductoPageState extends State<CrearProductoPage> {
         stock: int.parse(_stockCtl.text),
         imaxe: _imagenUrlCtl.text.trim(),
         categoria: _categoriaCtl.text.trim(),
-        negocioId: negocio.id,
+        // No es necesario establecer negocioId, lo auto-resuelve el backend
       );
 
-      await _productoService.create(producto);
+      await _productoService.crearProductoEnNegocio(producto);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

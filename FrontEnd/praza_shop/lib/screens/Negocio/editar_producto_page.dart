@@ -74,7 +74,8 @@ class _EditarProductoPageState extends State<EditarProductoPage> {
         negocioId: widget.producto.negocioId,
       );
 
-      await _productoService.update(productoActualizado.id!, productoActualizado);
+      // Usar el nuevo endpoint user-scoped que verifica propiedad
+      await _productoService.actualizarProductoEnNegocio(productoActualizado.id!, productoActualizado);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

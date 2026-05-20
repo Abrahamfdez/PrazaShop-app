@@ -112,4 +112,20 @@ public interface PedidoService {
             Integer pagina,
             Integer tamaño
     );
+
+    /**
+     * Obtiene la entidad Pedido por ID (sin convertir a DTO).
+     *
+     * @param id id del pedido
+     * @return entidad Pedido
+     */
+    org.example.prazashop.model.entity.Pedido findEntityById(Long id);
+
+    /**
+     * Convierte una entidad Pedido a PedidoConDetallesDto.
+     *
+     * @param pedido entidad a convertir
+     * @return PedidoConDetallesDto
+     */
+    org.example.prazashop.model.dto.PedidoConDetallesDto toDtoConDetalles(org.example.prazashop.model.entity.Pedido pedido);
 }

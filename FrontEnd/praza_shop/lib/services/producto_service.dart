@@ -62,4 +62,54 @@ class ProductoService {
     }
     throw Exception('Get producto detalles failed: ${res.statusCode} ${res.body}');
   }
+
+  // ===== NUEVOS ENDPOINTS USER-SCOPED (Fase 3) =====
+
+  /// Crea un nuevo producto para el negocio del usuario autenticado
+  Future<ProductoDto> crearProductoEnNegocio(ProductoDto p) async {
+    final uri = Uri.parse('${api.baseUrl}/api/mi-negocio/productos');
+    final res = await http.post(uri, headers: api.headers(), body: json.encode(p.toJson()));
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return ProductoDto.fromJson(json.decode(res.body));
+    }
+    throw Exception('Create producto en negocio failed: ${res.statusCode} ${res.body}');
+  }
+
+  /// Actualiza un producto del negocio del usuario autenticado
+  Future<ProductoDto> actualizarProductoEnNegocio(int id, ProductoDto p) async {
+    final uri = Uri.parse('${api.baseUrl}/api/mi-negocio/productos/$id');
+    final res = await http.put(uri, headers: api.headers(), body: json.encode(p.toJson()));
+    if (res.statusCode == 200) {
+      return ProductoDto.fromJson(json.decode(res.body));
+    }
+    throw Exception('Update producto en negocio failed: ${res.statusCode} ${res.body}');
+  }
+
+  /// Elimina un producto del negocio del usuario autenticado
+  Future<void> eliminarProductoDelNegocio(int id) async {
+    final uri = Uri.parse('${api.baseUrl}/api/mi-negocio/productos/$id');
+    final res = await http.delete(uri, headers: api.headers(jsonBody: false));
+    if (res.statusCode != 200 && res.statusCode != 204) {
+      throw Exception('Delete producto del negocio failed: ${res.statusCode} ${res.body}');
+    }
+  }
+
+  /// Obtiene todos los productos del negocio del usuario autenticado
+  Future<List<ProductoDto>> misProductos({
+    int pagina = 0,
+    int tamano = 20,
+  }) async {
+    final params = <String, String>{
+      'pagina': pagina.toString(),
+      'tamaño': tamano.toString(),
+    };
+
+    final uri = Uri.parse('${api.baseUrl}/api/mi-negocio/productos').replace(queryParameters: params);
+    final res = await http.get(uri, headers: api.headers(jsonBody: false));
+    if (res.statusCode == 200) {
+      final data = json.decode(res.body) as List<dynamic>;
+      return data.map((e) => ProductoDto.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    throw Exception('Get mis productos failed: ${res.statusCode} ${res.body}');
+  }
 }

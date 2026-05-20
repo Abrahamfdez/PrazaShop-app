@@ -32,17 +32,13 @@ class _ClientePedidosPageState extends State<ClientePedidosPage> {
     _pedidosFuture = _cargarPedidos();
   }
 
-  /// Carga los pedidos del cliente usando el nuevo endpoint buscarPedidos con soporte a paginación
+  /// Carga los pedidos del cliente usando el nuevo endpoint /api/mi-compra/pedidos
   Future<List<PedidoConDetallesDto>> _cargarPedidos() async {
     try {
-      var cliente = await ClienteService(widget.api).getByUsuarioId(widget.usuario.id!);
-      
-      // Usar el nuevo endpoint buscarPedidos que devuelve paginado
-      // Por ahora cargamos todos con un tamaño grande
-      final resultado = await _pedidoService.buscarPedidos(
-        pagina: 0, // Pagina 0 (basada en 0)
+      // Usar el nuevo endpoint user-scoped que auto-resuelve el clienteId
+      final resultado = await _pedidoService.misPedidos(
+        pagina: 0,
         tamano: 100,
-        ordenar: 'fecha_desc', // Mostrar mas recientes primero
       );
       
       // El resultado es un Map con 'content' que contiene los pedidos

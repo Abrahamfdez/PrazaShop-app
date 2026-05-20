@@ -11,6 +11,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.List;
+
 /**
  * The type Global exception handler.
  */
@@ -40,11 +42,16 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
-        String message = ex.getBindingResult().getFieldErrors().stream()
-                .findFirst()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .orElse("Solicitud no válida");
-        return buildResponse(HttpStatus.BAD_REQUEST, message, request);
+        List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> new FieldError(error.getField(), error.getDefaultMessage()))
+                .toList();
+        
+        String message = fieldErrors.isEmpty() ? 
+            "Solicitud no válida" : 
+            "Errores de validación: " + fieldErrors.size() + " campo(s)";
+        
+        ApiErrorResponse body = ApiErrorResponse.of(HttpStatus.BAD_REQUEST, message, request.getRequestURI(), fieldErrors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
     /**

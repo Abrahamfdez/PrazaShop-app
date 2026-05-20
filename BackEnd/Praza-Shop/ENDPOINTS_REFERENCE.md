@@ -13,9 +13,10 @@
 | 🔄 Compras Recurrentes | 5 | ✅ Funcionales |
 | ⭐ Valoraciones | 5 | ✅ Funcionales |
 | 👤 Usuarios | 5 | ✅ Funcionales |
+| 🛒 Endpoints User-Scoped (Fase 3) | 9 | ✅ Funcionales (NUEVOS) |
 | 🧪 Test | 1 | ✅ Funcional |
 
-**Total: 49 Endpoints Funcionales (5 nuevos endpoints de optimización agregados)**
+**Total: 58 Endpoints Funcionales (9 nuevos endpoints user-scoped de Fase 3 agregados)**
 
 ---
 
@@ -716,6 +717,330 @@ PUT /api/usuarios/{id}
 DELETE /api/usuarios/{id}
 ```
 **Autenticación:** Requerida ✔️
+
+---
+
+## 🛒 ENDPOINTS USER-SCOPED (FASE 3) - Autodetección de Contexto de Usuario
+
+**Descripción:** Estos endpoints utilizan el SecurityContext para autodetectar automáticamente el usuarioId, clienteId y negocioId del usuario autenticado. Eliminan la necesidad de pasar estos IDs en la request, centralizando la lógica de autorización en el backend.
+
+---
+
+### 1. Crear Pedido como Cliente
+```
+POST /api/mi-compra/pedidos
+```
+**Descripción:** Crea un nuevo pedido con detalles en una transacción atómica. El clienteId se detecta automáticamente del token del usuario autenticado.
+**Autenticación:** Requerida ✔️ (Usuario tipo CLIENTE)
+**Request:**
+```json
+{
+  "negocioId": 1,
+  "detalles": [
+    {
+      "productoId": 1,
+      "cantidad": 2
+    },
+    {
+      "productoId": 3,
+      "cantidad": 1
+    }
+  ]
+}
+```
+**Response:**
+```json
+{
+  "idPedido": 15,
+  "clienteId": 2,
+  "negocioId": 1,
+  "total": 2029.97,
+  "estado": "PENDIENTE",
+  "dataPedido": "2026-05-20T14:30:00",
+  "detalles": [
+    {
+      "id": 1,
+      "productoId": 1,
+      "cantidade": 2,
+      "prezoUnitario": 999.99
+    }
+  ]
+}
+```
+**Errores:**
+- `401 Unauthorized`: Token inválido o expirado
+- `403 Forbidden`: Usuario no tiene rol CLIENTE
+- `404 Not Found`: Negocio o producto no encontrado
+- `400 Bad Request`: Stock insuficiente
+
+---
+
+### 2. Obtener Mis Pedidos (Cliente)
+```
+GET /api/mi-compra/pedidos?pagina=0&tamano=10
+```
+**Descripción:** Obtiene todos los pedidos del cliente autenticado con paginación. El clienteId se detecta automáticamente.
+**Autenticación:** Requerida ✔️ (Usuario tipo CLIENTE)
+**Query Parameters:**
+- `pagina` (optional, default: 0): Número de página
+- `tamano` (optional, default: 10): Elementos por página
+
+**Response:**
+```json
+{
+  "content": [
+    {
+      "id": 15,
+      "clienteId": 2,
+      "negocioId": 1,
+      "total": 2029.97,
+      "estado": "PENDIENTE",
+      "dataPedido": "2026-05-20T14:30:00"
+    },
+    {
+      "id": 14,
+      "clienteId": 2,
+      "negocioId": 1,
+      "total": 999.99,
+      "estado": "ENTREGADO",
+      "dataPedido": "2026-05-18T10:15:00"
+    }
+  ],
+  "pageNumber": 0,
+  "pageSize": 10,
+  "totalElements": 12,
+  "totalPages": 2,
+  "last": false
+}
+```
+
+---
+
+### 3. Obtener Mis Productos (Negocio)
+```
+GET /api/mi-negocio/productos?pagina=0&tamano=10
+```
+**Descripción:** Obtiene todos los productos del negocio del usuario autenticado con paginación. El negocioId se detecta automáticamente.
+**Autenticación:** Requerida ✔️ (Usuario tipo NEGOCIO)
+**Query Parameters:**
+- `pagina` (optional, default: 0): Número de página
+- `tamano` (optional, default: 10): Elementos por página
+
+**Response:**
+```json
+{
+  "content": [
+    {
+      "id": 1,
+      "nome": "Laptop Gaming",
+      "descricion": "Laptop potente para gaming",
+      "prezo": 999.99,
+      "stock": 10,
+      "categoria": "Electrónica",
+      "negocioId": 1
+    },
+    {
+      "id": 3,
+      "nome": "Mouse Inalámbrico",
+      "descricion": "Mouse gamer con RGB",
+      "prezo": 29.99,
+      "stock": 50,
+      "categoria": "Accesorios",
+      "negocioId": 1
+    }
+  ],
+  "pageNumber": 0,
+  "pageSize": 10,
+  "totalElements": 8,
+  "totalPages": 1,
+  "last": true
+}
+```
+
+---
+
+### 4. Crear Producto en Mi Negocio
+```
+POST /api/mi-negocio/productos
+```
+**Descripción:** Crea un nuevo producto en el negocio del usuario autenticado. El negocioId se detecta automáticamente.
+**Autenticación:** Requerida ✔️ (Usuario tipo NEGOCIO)
+**Request:**
+```json
+{
+  "nome": "Teclado Mecánico",
+  "descricion": "Teclado mecánico RGB profesional",
+  "prezo": 149.99,
+  "stock": 25,
+  "categoria": "Accesorios",
+  "imaxe": "https://example.com/teclado.jpg"
+}
+```
+**Response:**
+```json
+{
+  "id": 10,
+  "nome": "Teclado Mecánico",
+  "descricion": "Teclado mecánico RGB profesional",
+  "prezo": 149.99,
+  "stock": 25,
+  "categoria": "Accesorios",
+  "negocioId": 1,
+  "imaxe": "https://example.com/teclado.jpg"
+}
+```
+
+---
+
+### 5. Actualizar Producto en Mi Negocio
+```
+PUT /api/mi-negocio/productos/{id}
+```
+**Descripción:** Actualiza un producto del negocio autenticado. Verifica automáticamente que el producto pertenece al negocio del usuario.
+**Autenticación:** Requerida ✔️ (Usuario tipo NEGOCIO)
+**Parámetros:** `id` (Long - ID del producto)
+**Request:**
+```json
+{
+  "nome": "Teclado Mecánico RGB",
+  "descricion": "Teclado mecánico RGB con interruptores Cherry MX",
+  "prezo": 159.99,
+  "stock": 20,
+  "categoria": "Accesorios",
+  "imaxe": "https://example.com/teclado-rgb.jpg"
+}
+```
+**Errores:**
+- `403 Forbidden`: El producto no pertenece a tu negocio
+- `404 Not Found`: Producto no encontrado
+
+---
+
+### 6. Eliminar Producto de Mi Negocio
+```
+DELETE /api/mi-negocio/productos/{id}
+```
+**Descripción:** Elimina un producto del negocio autenticado. Verifica automáticamente que el producto pertenece al negocio del usuario.
+**Autenticación:** Requerida ✔️ (Usuario tipo NEGOCIO)
+**Parámetros:** `id` (Long - ID del producto)
+**Errores:**
+- `403 Forbidden`: El producto no pertenece a tu negocio
+- `404 Not Found`: Producto no encontrado
+
+---
+
+### 7. Obtener Mis Ventas (Negocio)
+```
+GET /api/mi-negocio/ventas?pagina=0&tamano=10
+```
+**Descripción:** Obtiene todos los pedidos (ventas) del negocio del usuario autenticado con paginación. El negocioId se detecta automáticamente.
+**Autenticación:** Requerida ✔️ (Usuario tipo NEGOCIO)
+**Query Parameters:**
+- `pagina` (optional, default: 0): Número de página
+- `tamano` (optional, default: 10): Elementos por página
+
+**Response:**
+```json
+{
+  "content": [
+    {
+      "id": 15,
+      "clienteId": 2,
+      "negocioId": 1,
+      "total": 2029.97,
+      "estado": "CONFIRMADO",
+      "dataPedido": "2026-05-20T14:30:00"
+    },
+    {
+      "id": 12,
+      "clienteId": 5,
+      "negocioId": 1,
+      "total": 299.97,
+      "estado": "ENTREGADO",
+      "dataPedido": "2026-05-19T09:45:00"
+    }
+  ],
+  "pageNumber": 0,
+  "pageSize": 10,
+  "totalElements": 24,
+  "totalPages": 3,
+  "last": false
+}
+```
+
+---
+
+### 8. Actualizar Estado de Venta (Pedido)
+```
+PUT /api/mi-negocio/ventas/{id}/estado
+```
+**Descripción:** Actualiza el estado de un pedido (venta) del negocio autenticado. Valida y ejecuta la transición de estado con manejo de stock. Verifica automáticamente que el pedido pertenece al negocio del usuario.
+**Autenticación:** Requerida ✔️ (Usuario tipo NEGOCIO)
+**Parámetros:** `id` (Long - ID del pedido)
+**Request:**
+```json
+{
+  "nuevoEstado": "CONFIRMADO"
+}
+```
+**Estados válidos:**
+- `PENDIENTE` → `CONFIRMADO` (Decrementa stock)
+- `CONFIRMADO` → `ENTREGADO` (No afecta stock)
+- `CONFIRMADO` → `CANCELADO` (Restaura stock)
+- `PENDIENTE` → `CANCELADO` (No afecta stock, solo reserva)
+
+**Response:**
+```json
+{
+  "id": 15,
+  "clienteId": 2,
+  "negocioId": 1,
+  "total": 2029.97,
+  "estado": "CONFIRMADO",
+  "dataPedido": "2026-05-20T14:30:00"
+}
+```
+**Errores:**
+- `403 Forbidden`: El pedido no pertenece a tu negocio
+- `404 Not Found`: Pedido no encontrado
+- `400 Bad Request`: Transición de estado no válida
+
+---
+
+### 9. Actualizar Múltiples Pedidos en Lote (Masa)
+```
+PUT /api/mi-negocio/ventas/actualizar-estado-lote
+```
+**Descripción:** Actualiza el estado de múltiples pedidos simultáneamente. Útil para cambiar varios pedidos a ENTREGADO o CANCELADO en una sola operación. Solo afecta pedidos que pertenecen al negocio autenticado.
+**Autenticación:** Requerida ✔️ (Usuario tipo NEGOCIO)
+**Request:**
+```json
+{
+  "pedidoIds": [15, 12, 10],
+  "nuevoEstado": "ENTREGADO"
+}
+```
+**Response:**
+```json
+{
+  "exitosos": [
+    {
+      "id": 15,
+      "estado": "ENTREGADO"
+    },
+    {
+      "id": 12,
+      "estado": "ENTREGADO"
+    }
+  ],
+  "errores": [
+    {
+      "id": 10,
+      "razon": "No pertenece a tu negocio"
+    }
+  ]
+}
+```
 
 ---
 

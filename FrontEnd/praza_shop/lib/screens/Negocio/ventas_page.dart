@@ -38,18 +38,13 @@ class _VentasPageState extends State<VentasPage> {
     _cargarPedidos();
   }
 
-  /// Carga los pedidos del negocio usando buscarPedidos con paginación
+  /// Carga los pedidos del negocio usando el nuevo endpoint /api/mi-negocio/ventas
   Future<void> _cargarPedidos() async {
     try {
       setState(() => _isLoading = true);
 
-      final usuario = await ApiUtils.getUserFromToken(widget.api, widget.api.token);
-      final negocio = await _negocioService.getByUsuarioId(usuario.id!);
-
-      // Usar buscarPedidos para obtener pedidos con detalles y paginación
-      final resultado = await _pedidoService.buscarPedidos(
-        estado: _filtroEstado == 'TODOS' ? null : _filtroEstado,
-        ordenar: 'fecha_desc',
+      // Usar el nuevo endpoint user-scoped que auto-resuelve el negocioId
+      final resultado = await _pedidoService.misVentas(
         pagina: _paginaActual,
         tamano: _tamanioPagina,
       );
@@ -62,12 +57,18 @@ class _VentasPageState extends State<VentasPage> {
         print('VENTAS_PAGE: First item = ${content.first}');
       }
       
-      final pedidos = content
+      // Filtrar por estado si es necesario
+      var pedidos = content
           .map((p) {
             print('VENTAS_PAGE: Parseando pedido: $p');
             return PedidoConDetallesDto.fromJson(p as Map<String, dynamic>);
           })
           .toList();
+      
+      // Aplicar filtro de estado en el cliente si es necesario
+      if (_filtroEstado != 'TODOS') {
+        pedidos = pedidos.where((p) => p.estado?.toUpperCase() == _filtroEstado).toList();
+      }
       
       print('VENTAS_PAGE: Pedidos parseados = ${pedidos.map((p) => 'ID: ${p.idPedido}, Estado: ${p.estado}').toList()}');
 

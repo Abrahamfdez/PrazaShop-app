@@ -89,10 +89,10 @@ class _NegocioPanelPageState extends State<NegocioPanelPage> {
     }
   }
 
-  /// Elimina un producto
+  /// Elimina un producto usando el nuevo endpoint user-scoped
   Future<void> _eliminarProducto(int productoId) async {
     try {
-      await _productoService.delete(productoId);
+      await _productoService.eliminarProductoDelNegocio(productoId);
       setState(() {
         _productos.removeWhere((p) => p.id == productoId);
       });

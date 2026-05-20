@@ -124,4 +124,75 @@ class PedidoService {
     }
     throw Exception('Buscar pedidos failed: ${res.statusCode} ${res.body}');
   }
+
+  /// ===== NUEVOS ENDPOINTS USER-SCOPED (Fase 3) =====
+
+  /// Obtiene los pedidos del cliente autenticado con paginación
+  Future<Map<String, dynamic>> misPedidos({
+    int pagina = 0,
+    int tamano = 10,
+  }) async {
+    final params = <String, String>{
+      'pagina': pagina.toString(),
+      'tamaño': tamano.toString(),
+    };
+
+    final uri = Uri.parse('${api.baseUrl}/api/mi-compra/pedidos').replace(queryParameters: params);
+    final res = await http.get(uri, headers: api.headers(jsonBody: false));
+    if (res.statusCode == 200) {
+      return json.decode(res.body) as Map<String, dynamic>;
+    }
+    throw Exception('Get mis pedidos failed: ${res.statusCode} ${res.body}');
+  }
+
+  /// Obtiene las ventas del negocio autenticado con paginación
+  Future<Map<String, dynamic>> misVentas({
+    int pagina = 0,
+    int tamano = 10,
+  }) async {
+    final params = <String, String>{
+      'pagina': pagina.toString(),
+      'tamaño': tamano.toString(),
+    };
+
+    final uri = Uri.parse('${api.baseUrl}/api/mi-negocio/ventas').replace(queryParameters: params);
+    final res = await http.get(uri, headers: api.headers(jsonBody: false));
+    if (res.statusCode == 200) {
+      return json.decode(res.body) as Map<String, dynamic>;
+    }
+    throw Exception('Get mis ventas failed: ${res.statusCode} ${res.body}');
+  }
+
+  /// Crea un pedido como cliente (auto-resuelve clienteId)
+  Future<PedidoConDetallesDto> crearPedidoComoCliente({
+    required int negocioId,
+    required List<Map<String, dynamic>> detalles, // [{productoId, cantidad}, ...]
+  }) async {
+    final uri = Uri.parse('${api.baseUrl}/api/mi-compra/pedidos');
+    final body = json.encode({
+      'negocioId': negocioId,
+      'detalles': detalles,
+    });
+    final res = await http.post(uri, headers: api.headers(), body: body);
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return PedidoConDetallesDto.fromJson(json.decode(res.body));
+    }
+    throw Exception('Crear pedido como cliente failed: ${res.statusCode} ${res.body}');
+  }
+
+  /// Actualiza el estado de un pedido (solo propietario del negocio)
+  Future<PedidoConDetallesDto> actualizarEstadoPedido({
+    required int pedidoId,
+    required String nuevoEstado,
+  }) async {
+    final uri = Uri.parse('${api.baseUrl}/api/mi-negocio/ventas/$pedidoId/estado');
+    final body = json.encode({
+      'nuevoEstado': nuevoEstado,
+    });
+    final res = await http.put(uri, headers: api.headers(), body: body);
+    if (res.statusCode == 200) {
+      return PedidoConDetallesDto.fromJson(json.decode(res.body));
+    }
+    throw Exception('Actualizar estado pedido failed: ${res.statusCode} ${res.body}');
+  }
 }
