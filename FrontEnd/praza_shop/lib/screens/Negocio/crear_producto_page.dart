@@ -50,23 +50,40 @@ class _CrearProductoPageState extends State<CrearProductoPage> {
     super.dispose();
   }
 
+  /// Valida que el precio sea número válido
+  String? _validarPrecio(String? value) {
+    if (value == null || value.trim().isEmpty) return 'Introduce o prezo';
+    if (double.tryParse(value) == null) return 'Prezo non válido';
+    return null;
+  }
+
+  /// Valida que el stock sea número entero válido
+  String? _validarStock(String? value) {
+    if (value == null || value.trim().isEmpty) return 'Introduce o stock';
+    if (int.tryParse(value) == null) return 'Stock non válido';
+    return null;
+  }
+
+  /// Valida que un campo no esté vacío
+  String? _validarNoVacio(String? value, String campo) {
+    if (value == null || value.trim().isEmpty) return 'Introduce $campo';
+    return null;
+  }
+
+  /// Crea el producto en el backend
   Future<void> _crearProducto() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
 
     try {
-      // Obtener usuario actual
       final usuario = await ApiUtils.getUserFromToken(widget.api, widget.api.token);
-
-      // Obtener negocio del usuario
       final negocio = await _negocioService.getByUsuarioId(usuario.id!);
 
-      // Crear producto
       final producto = ProductoDto(
         nome: _nombreCtl.text.trim(),
         descricion: _descripcionCtl.text.trim(),
-        prezo: double.tryParse(_prezoCtl.text) ?? 0.0,
-        stock: int.tryParse(_stockCtl.text) ?? 0,
+        prezo: double.parse(_prezoCtl.text),
+        stock: int.parse(_stockCtl.text),
         imaxe: _imagenUrlCtl.text.trim(),
         categoria: _categoriaCtl.text.trim(),
         negocioId: negocio.id,
@@ -78,7 +95,7 @@ class _CrearProductoPageState extends State<CrearProductoPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Producto creado exitosamente')),
       );
-      Navigator.of(context).pop(true); // Retornar true para recargar la lista
+      Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -119,177 +136,72 @@ class _CrearProductoPageState extends State<CrearProductoPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // URL Imaxe
-              const Text(
-                'URL da imaxe',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _imagenUrlCtl,
-                decoration: InputDecoration(
-                  hintText: 'https://example.com/imagen.jpg',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Introduce a URL da imaxe' : null,
-              ),
-              const SizedBox(height: 12),
-
-              // Preview da imaxe
-              if (_imagenUrlCtl.text.isNotEmpty)
-                Container(
-                  width: double.infinity,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey[200],
-                  ),
-                  child: Image.network(
-                    _imagenUrlCtl.text,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Center(
-                        child: Icon(Icons.image_not_supported, size: 48),
-                      );
-                    },
-                  ),
-                )
-              else
-                Container(
-                  width: double.infinity,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey[200],
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.image_not_supported, size: 48),
-                  ),
-                ),
+              // Preview de imagen
+              _buildImagePreview(),
               const SizedBox(height: 24),
 
-              // Nome do produto
-              const Text(
-                'Nome do produto',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              // URL de imagen
+              _buildFormField(
+                label: 'URL da imaxe',
+                controller: _imagenUrlCtl,
+                hint: 'https://example.com/imagen.jpg',
+                validator: (v) => _validarNoVacio(v, 'a URL da imaxe'),
               ),
-              const SizedBox(height: 8),
-              TextFormField(
+              const SizedBox(height: 24),
+
+              // Nome
+              _buildFormField(
+                label: 'Nome do producto',
                 controller: _nombreCtl,
-                decoration: InputDecoration(
-                  hintText: 'Ej: Tomates Galegos',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Introduce o nome do produto' : null,
+                hint: 'Ej: Tomates Galegos',
+                validator: (v) => _validarNoVacio(v, 'o nome do producto'),
               ),
               const SizedBox(height: 12),
 
               // Categoría
-              const Text(
-                'Categoría',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
+              _buildFormField(
+                label: 'Categoría',
                 controller: _categoriaCtl,
-                decoration: InputDecoration(
-                  hintText: 'Ej: Frutas, Verduras, etc',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Introduce a categoría' : null,
+                hint: 'Ej: Frutas, Verduras',
+                validator: (v) => _validarNoVacio(v, 'a categoría'),
               ),
               const SizedBox(height: 12),
 
               // Descripción
-              const Text(
-                'Descripción',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
+              _buildFormField(
+                label: 'Descripción',
                 controller: _descripcionCtl,
-                decoration: InputDecoration(
-                  hintText: 'Describe o teu producto...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
+                hint: 'Describe o teu producto...',
                 maxLines: 3,
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Introduce a descripción' : null,
+                validator: (v) => _validarNoVacio(v, 'a descripción'),
               ),
               const SizedBox(height: 12),
 
-              // Prezo e Stock
+              // Precio y Stock
               Row(
                 children: [
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Prezo (€)',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                        ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _prezoCtl,
-                          decoration: InputDecoration(
-                            hintText: '0.00',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) return 'Introduce o prezo';
-                            if (double.tryParse(v) == null) return 'Prezo non válido';
-                            return null;
-                          },
-                        ),
-                      ],
+                    child: _buildFormField(
+                      label: 'Prezo (€)',
+                      controller: _prezoCtl,
+                      hint: '0.00',
+                      keyboardType: TextInputType.number,
+                      validator: _validarPrecio,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Stock (kg)',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                        ),
-                        const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _stockCtl,
-                          decoration: InputDecoration(
-                            hintText: '0',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          keyboardType: TextInputType.number,
-                          validator: (v) {
-                            if (v == null || v.trim().isEmpty) return 'Introduce o stock';
-                            if (int.tryParse(v) == null) return 'Stock non válido';
-                            return null;
-                          },
-                        ),
-                      ],
+                    child: _buildFormField(
+                      label: 'Stock (unidades)',
+                      controller: _stockCtl,
+                      hint: '0',
+                      keyboardType: TextInputType.number,
+                      validator: _validarStock,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
 
               // Botón crear
               SizedBox(
@@ -305,13 +217,20 @@ class _CrearProductoPageState extends State<CrearProductoPage> {
                   ),
                   onPressed: _loading ? null : _crearProducto,
                   child: _loading
-                      ? const CircularProgressIndicator(color: Colors.white)
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            strokeWidth: 2,
+                          ),
+                        )
                       : const Text(
-                          'Crear producto',
+                          'Crear Producto',
                           style: TextStyle(
+                            color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
                           ),
                         ),
                 ),
@@ -320,6 +239,66 @@ class _CrearProductoPageState extends State<CrearProductoPage> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Widget auxiliar para mostrar preview de imagen
+  Widget _buildImagePreview() {
+    return Container(
+      width: double.infinity,
+      height: 200,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.grey[200],
+      ),
+      child: _imagenUrlCtl.text.isEmpty
+          ? const Center(
+              child: Icon(Icons.image_not_supported, size: 48, color: Colors.grey),
+            )
+          : ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                _imagenUrlCtl.text,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Center(
+                    child: Icon(Icons.image_not_supported, size: 48),
+                  );
+                },
+              ),
+            ),
+    );
+  }
+
+  /// Widget auxiliar para campos de formulario reutilizables
+  Widget _buildFormField({
+    required String label,
+    required TextEditingController controller,
+    required String hint,
+    int maxLines = 1,
+    TextInputType keyboardType = TextInputType.text,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          decoration: InputDecoration(
+            hintText: hint,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          ),
+          maxLines: maxLines,
+          keyboardType: keyboardType,
+          validator: validator,
+        ),
+      ],
     );
   }
 }

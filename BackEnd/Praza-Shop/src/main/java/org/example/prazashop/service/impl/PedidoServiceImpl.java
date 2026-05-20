@@ -328,7 +328,7 @@ public class PedidoServiceImpl implements PedidoService {
         // Aplicar paginación
         int start = pagina * tamaño;
         int end = Math.min(start + tamaño, ordenados.size());
-        List<PedidoDto> contenido = ordenados.subList(start, end).stream().map(this::toDto).toList();
+        List<PedidoConDetallesDto> contenido = ordenados.subList(start, end).stream().map(this::toDtoConDetalles).toList();
 
         return PedidoSearchResponse.builder()
                 .content(contenido)

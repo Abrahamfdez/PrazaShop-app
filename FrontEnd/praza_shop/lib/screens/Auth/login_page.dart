@@ -38,8 +38,6 @@ class _LoginPageState extends State<LoginPage> {
       final email = _emailCtl.text.trim();
       final password = _passCtl.text;
       try {
-        // Aquí se llamaría a AuthUtils.performLoginAndGetInfo para realizar el login
-        // y obtener el rol del usuario, luego navegar a la pantalla correspondiente.
         var token=await widget.api.login(email, password);
         var usuario=await ApiUtils.getUserFromToken(widget.api, token.accessToken);
         switch (usuario.tipoUsuario) {

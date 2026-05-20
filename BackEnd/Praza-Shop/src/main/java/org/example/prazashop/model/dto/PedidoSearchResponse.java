@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PedidoSearchResponse {
-    private List<PedidoDto> content;
+    private List<PedidoConDetallesDto> content;
     private Integer pageNumber;
     private Integer pageSize;
     private Long totalElements;

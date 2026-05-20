@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:praza_shop/models/pedido_dto.dart';
+import 'package:praza_shop/models/pedido_con_detalles_dto.dart';
 import 'package:praza_shop/services/api_service.dart';
 import 'package:praza_shop/services/negocio_service.dart';
 import 'package:praza_shop/services/pedido_service.dart';
 import 'package:praza_shop/utils/api_utils.dart';
 
-/// Página para ver todas las ventas (pedidos) del negocio
+/// Página para ver todas las ventas (pedidos) del negocio con detalles
 class VentasPage extends StatefulWidget {
   final ApiService api;
 
@@ -22,8 +22,13 @@ class _VentasPageState extends State<VentasPage> {
   late NegocioService _negocioService;
   late PedidoService _pedidoService;
 
-  List<PedidoDto> _pedidos = [];
+  List<PedidoConDetallesDto> _pedidos = [];
   bool _isLoading = true;
+  String _filtroEstado = 'TODOS';
+  int _paginaActual = 0;
+  final int _tamanioPagina = 20;
+
+  final List<String> _estadosDisponibles = ['TODOS', 'PENDIENTE', 'CONFIRMADO', 'ENTREGADO', 'CANCELADO'];
 
   @override
   void initState() {
@@ -33,16 +38,38 @@ class _VentasPageState extends State<VentasPage> {
     _cargarPedidos();
   }
 
+  /// Carga los pedidos del negocio usando buscarPedidos con paginación
   Future<void> _cargarPedidos() async {
     try {
-      // Obtener usuario actual
-      final usuario = await ApiUtils.getUserFromToken(widget.api, widget.api.token);
+      setState(() => _isLoading = true);
 
-      // Obtener negocio del usuario
+      final usuario = await ApiUtils.getUserFromToken(widget.api, widget.api.token);
       final negocio = await _negocioService.getByUsuarioId(usuario.id!);
 
-      // Obtener pedidos del negocio
-      final pedidos = await _pedidoService.findByNegocioId(negocio.id!);
+      // Usar buscarPedidos para obtener pedidos con detalles y paginación
+      final resultado = await _pedidoService.buscarPedidos(
+        estado: _filtroEstado == 'TODOS' ? null : _filtroEstado,
+        ordenar: 'fecha_desc',
+        pagina: _paginaActual,
+        tamano: _tamanioPagina,
+      );
+
+      print('VENTAS_PAGE: Resultado completo = $resultado');
+      
+      final content = resultado['content'] as List<dynamic>? ?? [];
+      print('VENTAS_PAGE: Content length = ${content.length}');
+      if (content.isNotEmpty) {
+        print('VENTAS_PAGE: First item = ${content.first}');
+      }
+      
+      final pedidos = content
+          .map((p) {
+            print('VENTAS_PAGE: Parseando pedido: $p');
+            return PedidoConDetallesDto.fromJson(p as Map<String, dynamic>);
+          })
+          .toList();
+      
+      print('VENTAS_PAGE: Pedidos parseados = ${pedidos.map((p) => 'ID: ${p.idPedido}, Estado: ${p.estado}').toList()}');
 
       if (!mounted) return;
       setState(() {
@@ -59,125 +86,109 @@ class _VentasPageState extends State<VentasPage> {
     }
   }
 
-  String _getEstadoColor(String? estado) {
-    switch (estado?.toLowerCase()) {
-      case 'pendiente':
-        return '#FFA500'; // Naranja
-      case 'confirmado':
-        return '#4CAF50'; // Verde
-      case 'entregado':
-        return '#2196F3'; // Azul
-      case 'cancelado':
-        return '#F44336'; // Rojo
-      default:
-        return '#757575'; // Gris
-    }
-  }
-
-  Color _getEstadoButtonColor(String? estado) {
-    switch (estado?.toLowerCase()) {
-      case 'pendiente':
+  /// Obtiene el color según el estado del pedido
+  Color _obtenerColorEstado(String? estado) {
+    switch (estado?.toUpperCase()) {
+      case 'PENDIENTE':
         return Colors.orange;
-      case 'confirmado':
+      case 'CONFIRMADO':
         return Colors.green;
-      case 'entregado':
+      case 'ENTREGADO':
         return Colors.blue;
-      case 'cancelado':
+      case 'CANCELADO':
         return Colors.red;
       default:
         return Colors.grey;
     }
   }
-  Future<void> _actualizarEstadoPedido(int id, String nuevoEstado) async {
-  try {
-    // Obtener el pedido actual de la lista
-    final pedidoActual = _pedidos.firstWhere((p) => p.id == id);
-    
-    // Crear una copia con el nuevo estado
-    final pedidoActualizado = PedidoDto(
-      id: pedidoActual.id,
-      clienteId: pedidoActual.clienteId,
-      negocioId: pedidoActual.negocioId,
-      dataPedido: pedidoActual.dataPedido,
-      dataConfirmacion: pedidoActual.dataConfirmacion,
-      dataEntrega: pedidoActual.dataEntrega,
-      dataCancelacion: pedidoActual.dataCancelacion,
-      estado: nuevoEstado,
-      total: pedidoActual.total,
-    );
-    
-    // Actualizar en el backend
-    await _pedidoService.update(id, pedidoActualizado);
-    
-    // Refrescar la lista
-    await _cargarPedidos();
-    
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Estado actualizado a: $nuevoEstado'),
-        backgroundColor: Colors.green,
-      ),
-    );
-  } catch (e) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error al actualizar: $e'),
-        backgroundColor: Colors.red,
-      ),
+
+  /// Actualiza el estado de un pedido
+  Future<void> _actualizarEstadoPedido(PedidoConDetallesDto pedido, String nuevoEstado) async {
+    try {
+      // Actualizar en backend
+      await _pedidoService.update(pedido.idPedido!.toInt(), _crearPedidoDtoActualizado(pedido, nuevoEstado));
+
+      // Recargar pedidos
+      await _cargarPedidos();
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Estado actualizado a: $nuevoEstado'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al actualizar: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  /// Crea un PedidoDto con estado actualizado para enviar al backend
+  dynamic _crearPedidoDtoActualizado(PedidoConDetallesDto pedido, String nuevoEstado) {
+    return {
+      'id': pedido.idPedido,
+      'clienteId': pedido.clienteId,
+      'negocioId': pedido.negocioId,
+      'dataPedido': pedido.dataPedido?.toIso8601String(),
+      'estado': nuevoEstado,
+      'total': pedido.total,
+    };
+  }
+
+  /// Muestra diálogo para cambiar estado
+  void _mostrarDialogoEstado(PedidoConDetallesDto pedido) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Cambiar estado del pedido #${pedido.idPedido}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Estado actual: ${pedido.estado}'),
+              const SizedBox(height: 20),
+              const Text('Selecciona el nuevo estado:'),
+              const SizedBox(height: 16),
+              ..._estadosDisponibles.where((e) => e != 'TODOS').map((estado) {
+                final esEstadoActual = estado == pedido.estado?.toUpperCase();
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: esEstadoActual ? _obtenerColorEstado(estado) : Colors.grey[300],
+                        foregroundColor: esEstadoActual ? Colors.white : Colors.black,
+                      ),
+                      onPressed: !esEstadoActual
+                          ? () {
+                              Navigator.of(context).pop();
+                              _actualizarEstadoPedido(pedido, estado);
+                            }
+                          : null,
+                      child: Text(estado),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+          ],
+        );
+      },
     );
   }
-}
-
-void _mostrarDialogoEstado(PedidoDto pedido) {
-  final estados = ['Pendiente', 'Confirmado', 'Entregado', 'Cancelado'];
-  
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Cambiar estado del pedido #${pedido.id}'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Estado actual: ${pedido.estado}'),
-            const SizedBox(height: 20),
-            const Text('Selecciona el nuevo estado:'),
-            const SizedBox(height: 16),
-            ...estados.map((estado) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: estado.toLowerCase() == pedido.estado?.toLowerCase()
-                        ? _getEstadoButtonColor(estado)
-                        : Colors.grey[300],
-                    foregroundColor: estado.toLowerCase() == pedido.estado?.toLowerCase()
-                        ? Colors.white
-                        : Colors.black,
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _actualizarEstadoPedido(pedido.id!, estado);
-                  },
-                  child: Text(estado),
-                ),
-              ),
-            )).toList(),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-        ],
-      );
-    },
-  );
-}
 
   @override
   Widget build(BuildContext context) {
@@ -202,129 +213,232 @@ void _mostrarDialogoEstado(PedidoDto pedido) {
         ),
         centerTitle: false,
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _pedidos.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      'Non hai vendas aínda',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16.0),
-                  itemCount: _pedidos.length,
-                  itemBuilder: (context, index) {
-                    final pedido = _pedidos[index];
-                    final estado = pedido.estado ?? 'Desconocido';
-                    final total = pedido.total ?? 0.0;
-                    final fecha = pedido.dataPedido ?? DateTime.now();
-
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey[200]!),
+      body: Column(
+        children: [
+          // Filtro de estados
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: _estadosDisponibles.map((estado) {
+                  final isSelected = _filtroEstado == estado;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: FilterChip(
+                      label: Text(estado),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          _filtroEstado = estado;
+                          _paginaActual = 0;
+                        });
+                        _cargarPedidos();
+                      },
+                      backgroundColor: Colors.grey[200],
+                      selectedColor: green,
+                      labelStyle: TextStyle(
+                        color: isSelected ? Colors.white : Colors.black,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Header con ID y estado
-                          // Header con ID, estado y botón editar
-Row(
-  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  children: [
-    Text(
-      'Pedido #${pedido.id}',
-      style: const TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w600,
-      ),
-    ),
-    Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 6,
-          ),
-          decoration: BoxDecoration(
-            color: _getEstadoButtonColor(estado),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            estado,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 8),
-        IconButton(
-          icon: const Icon(Icons.edit, size: 18),
-          onPressed: () => _mostrarDialogoEstado(pedido),
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-        ),
-      ],
-    ),
-  ],
-),
-                          const SizedBox(height: 8),
-
-                          // Fecha
-                          Text(
-                            'Data: ${fecha.day}/${fecha.month}/${fecha.year}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
+          // Lista de pedidos
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _pedidos.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            'Non hai vendas aínda',
+                            style: TextStyle(color: Colors.grey[600]),
                           ),
-                          const SizedBox(height: 8),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16.0),
+                        itemCount: _pedidos.length,
+                        itemBuilder: (context, index) {
+                          final pedido = _pedidos[index];
+                          final estado = pedido.estado ?? 'Desconocido';
+                          final total = pedido.total ?? 0.0;
+                          final fecha = pedido.dataPedido ?? DateTime.now();
 
-                          // Cliente ID
-                          Text(
-                            'Cliente ID: ${pedido.clienteId ?? 'N/A'}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.grey[200]!),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 4,
+                                )
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Total
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Total:',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            child: ExpansionTile(
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Pedido #${pedido.idPedido}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: _obtenerColorEstado(estado),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      estado,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                '${total.toStringAsFixed(2)}€',
+                              subtitle: Text(
+                                'Total: ${total.toStringAsFixed(2)}€',
                                 style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
                                   color: green,
                                 ),
                               ),
-                            ],
-                          ),
-                        ],
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      _buildInfoRow('Fecha', '${fecha.day}/${fecha.month}/${fecha.year}'),
+                                      _buildInfoRow('Cliente ID', '${pedido.clienteId}'),
+                                      _buildInfoRow('Estado', pedido.estado ?? 'N/A'),
+                                      const SizedBox(height: 12),
+                                      // Detalles del pedido
+                                      if (pedido.detalles != null && pedido.detalles!.isNotEmpty) ...[
+                                        const Text(
+                                          'Detalles:',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        ...pedido.detalles!.map((detalle) {
+                                          final subtotal = detalle.subtotal ?? 0.0;
+                                          return Padding(
+                                            padding: const EdgeInsets.only(bottom: 8.0),
+                                            child: Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[50],
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Text(
+                                                          detalle.nombreProducto ?? 'Producto',
+                                                          style: const TextStyle(
+                                                            fontSize: 12,
+                                                            fontWeight: FontWeight.w500,
+                                                          ),
+                                                          overflow: TextOverflow.ellipsis,
+                                                        ),
+                                                        Text(
+                                                          'Cant: ${detalle.cantidade} × ${detalle.prezoUnitario?.toStringAsFixed(2)}€',
+                                                          style: TextStyle(
+                                                            fontSize: 11,
+                                                            color: Colors.grey[600],
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    '${subtotal.toStringAsFixed(2)}€',
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ],
+                                      const SizedBox(height: 12),
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: ElevatedButton.icon(
+                                          onPressed: () => _mostrarDialogoEstado(pedido),
+                                          icon: const Icon(Icons.edit, size: 16),
+                                          label: const Text('Cambiar estado'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: green,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Widget auxiliar para mostrar información en filas
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.grey[600],
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

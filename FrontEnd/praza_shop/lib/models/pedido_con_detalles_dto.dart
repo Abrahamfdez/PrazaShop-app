@@ -26,28 +26,49 @@ class PedidoConDetallesDto {
   });
 
   factory PedidoConDetallesDto.fromJson(Map<String, dynamic> json) {
+    // Debug: print del JSON para diagnosticar
+    print('PedidoConDetallesDto.fromJson: $json');
+    
     return PedidoConDetallesDto(
-      idPedido: json['idPedido'] is int
-          ? json['idPedido']
-          : (json['idPedido'] != null ? int.tryParse('${json['idPedido']}') : null),
-      clienteId: json['clienteId'] is int
-          ? json['clienteId']
-          : (json['clienteId'] != null ? int.tryParse('${json['clienteId']}') : null),
-      negocioId: json['negocioId'] is int
-          ? json['negocioId']
-          : (json['negocioId'] != null ? int.tryParse('${json['negocioId']}') : null),
-      dataPedido: json['dataPedido'] != null ? DateTime.tryParse(json['dataPedido'].toString()) : null,
-      dataConfirmacion: json['dataConfirmacion'] != null ? DateTime.tryParse(json['dataConfirmacion'].toString()) : null,
-      dataEntrega: json['dataEntrega'] != null ? DateTime.tryParse(json['dataEntrega'].toString()) : null,
-      dataCancelacion: json['dataCancelacion'] != null ? DateTime.tryParse(json['dataCancelacion'].toString()) : null,
-      estado: json['estado'],
-      total: json['total'] is double
-          ? json['total']
-          : (json['total'] != null ? double.tryParse('${json['total']}') : null),
+      idPedido: _parseIntValue(json['idPedido'] ?? json['id']),
+      clienteId: _parseIntValue(json['clienteId'] ?? json['cliente_id']),
+      negocioId: _parseIntValue(json['negocioId'] ?? json['negocio_id']),
+      dataPedido: _parseDateTimeValue(json['dataPedido'] ?? json['data_pedido']),
+      dataConfirmacion: _parseDateTimeValue(json['dataConfirmacion'] ?? json['data_confirmacion']),
+      dataEntrega: _parseDateTimeValue(json['dataEntrega'] ?? json['data_entrega']),
+      dataCancelacion: _parseDateTimeValue(json['dataCancelacion'] ?? json['data_cancelacion']),
+      estado: (json['estado'] ?? json['estado'])?.toString(),
+      total: _parseDoubleValue(json['total']),
       detalles: (json['detalles'] as List<dynamic>?)
           ?.map((e) => DetallePedidoConProductoDto.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
+  }
+
+  /// Parsea un valor a int, maneja int, String, double, null
+  static int? _parseIntValue(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  /// Parsea un valor a double, maneja int, String, double, null
+  static double? _parseDoubleValue(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
+  }
+
+  /// Parsea un valor a DateTime
+  static DateTime? _parseDateTimeValue(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
+    return null;
   }
 
   Map<String, dynamic> toJson() => {
