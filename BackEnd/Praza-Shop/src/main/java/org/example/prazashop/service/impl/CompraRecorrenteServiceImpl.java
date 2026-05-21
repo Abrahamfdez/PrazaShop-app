@@ -69,6 +69,16 @@ public class CompraRecorrenteServiceImpl implements CompraRecorrenteService {
         compraRecorrenteRepository.deleteById(id);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<CompraRecorrenteDto> findByClienteId(Long clienteId) {
+        Cliente cliente = clienteRepository.findById(clienteId)
+                .orElseThrow(() -> new NotFoundException("Cliente no encontrado con id " + clienteId));
+        return compraRecorrenteRepository.findByCliente(cliente).stream()
+                .map(this::toDto)
+                .toList();
+    }
+
     private CompraRecorrenteDto toDto(CompraRecorrente compraRecorrente) {
         return CompraRecorrenteDto.builder()
                 .id(compraRecorrente.getIdRecorrente())

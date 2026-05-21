@@ -1095,7 +1095,7 @@ Content-Type: application/json
 
 ---
 
-**Última actualización:** 21 de Abril de 2026  
-**Versión:** 0.0.1-SNAPSHOT  
-**Estado:** ✅ Todos los endpoints funcionales
+**Última actualización:** 20 de Mayo de 2026 (Fase 3: 9 nuevos endpoints user-scoped agregados)  
+**Versión:** 0.0.2-SNAPSHOT (Fase 3)  
+**Estado:** ✅ 58 endpoints totales funcionales (incl. 9 nuevos user-scoped)
 

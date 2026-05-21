@@ -5,7 +5,7 @@ import 'package:praza_shop/models/negocio_dto.dart';
 import 'package:praza_shop/services/api_service.dart';
 import 'package:praza_shop/services/negocio_service.dart';
 import 'package:praza_shop/widgets/producto_card.dart';
-import 'cliente_pedidos_page.dart';
+import 'cliente_perfil_page.dart';
 
 /// Página principal para clientes que muestra productos disponibles
 /// y permite buscar y filtrar por categorías.
@@ -131,7 +131,7 @@ class _ClienteHomePageState extends State<ClienteHomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ClientePedidosPage(
+                    builder: (context) => ClientePerfilPage(
                       api: widget.api,
                       usuario: widget.usuario,
                     ),

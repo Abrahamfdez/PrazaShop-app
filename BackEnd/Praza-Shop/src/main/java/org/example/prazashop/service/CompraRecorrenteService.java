@@ -47,4 +47,12 @@ public interface CompraRecorrenteService {
      * @param id the id
      */
     void deleteById(Long id);
+
+    /**
+     * Find by cliente id (user-scoped endpoint).
+     *
+     * @param clienteId the cliente id
+     * @return the list
+     */
+    List<CompraRecorrenteDto> findByClienteId(Long clienteId);
 }

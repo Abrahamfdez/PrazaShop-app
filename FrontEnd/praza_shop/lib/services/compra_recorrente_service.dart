@@ -43,4 +43,17 @@ class CompraRecorrenteService {
     final res = await http.delete(uri, headers: api.headers(jsonBody: false));
     if (res.statusCode != 200 && res.statusCode != 204) throw Exception('Delete compra-recorrente failed: ${res.statusCode} ${res.body}');
   }
+
+  /// ===== NUEVOS ENDPOINTS USER-SCOPED (Fase 3) =====
+
+  /// Obtiene las compras recurrentes del cliente autenticado
+  Future<List<CompraRecorrenteDto>> misComprasRecurrentes() async {
+    final uri = Uri.parse('${api.baseUrl}/api/mis-compras-recurrentes');
+    final res = await http.get(uri, headers: api.headers(jsonBody: false));
+    if (res.statusCode == 200) {
+      final data = json.decode(res.body) as List<dynamic>;
+      return data.map((e) => CompraRecorrenteDto.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    throw Exception('Get mis compras recurrentes failed: ${res.statusCode} ${res.body}');
+  }
 }
