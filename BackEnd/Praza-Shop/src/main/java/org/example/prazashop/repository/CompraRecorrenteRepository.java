@@ -26,4 +26,13 @@ public interface CompraRecorrenteRepository extends JpaRepository<CompraRecorren
      * @return the list of compras recurrentes
      */
     List<CompraRecorrente> findByProducto(Producto producto);
+
+    /**
+     * Find all compras recurrentes by negocio id.
+     * Follows the relationship: CompraRecorrente -> Producto -> Negocio
+     *
+     * @param idNegocio the negocio id
+     * @return the list of compras recurrentes
+     */
+    List<CompraRecorrente> findByProducto_Negocio_IdNegocio(Long idNegocio);
 }
