@@ -79,4 +79,15 @@ class CompraRecorrenteService {
     }
     throw Exception('Create mi compra recurrente failed: ${res.statusCode} ${res.body}');
   }
+
+  /// Obtiene las compras recurrentes del negocio autenticado
+  Future<List<CompraRecorrenteDto>> misComprasRecurrentesNegocio() async {
+    final uri = Uri.parse('${api.baseUrl}/api/mi-negocio/compras-recurrentes');
+    final res = await http.get(uri, headers: api.headers(jsonBody: false));
+    if (res.statusCode == 200) {
+      final data = json.decode(res.body) as List<dynamic>;
+      return data.map((e) => CompraRecorrenteDto.fromJson(e as Map<String, dynamic>)).toList();
+    }
+    throw Exception('Get mis compras recurrentes negocio failed: ${res.statusCode} ${res.body}');
+  }
 }

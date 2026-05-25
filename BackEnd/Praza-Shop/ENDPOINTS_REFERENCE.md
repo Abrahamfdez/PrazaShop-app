@@ -13,10 +13,10 @@
 | 🔄 Compras Recurrentes | 5 | ✅ Funcionales |
 | ⭐ Valoraciones | 5 | ✅ Funcionales |
 | 👤 Usuarios | 5 | ✅ Funcionales |
-| 🛒 Endpoints User-Scoped (Fase 3) | 11 | ✅ Funcionales (NUEVOS) |
+| 🛒 Endpoints User-Scoped (Fase 3) | 12 | ✅ Funcionales (NUEVOS) |
 | 🧪 Test | 1 | ✅ Funcional |
 
-**Total: 60 Endpoints Funcionales (11 endpoints user-scoped de Fase 3 agregados)**
+**Total: 61 Endpoints Funcionales (12 endpoints user-scoped de Fase 3 agregados)**
 
 ---
 
@@ -1116,6 +1116,42 @@ POST /api/mis-compras-recurrentes
 
 ---
 
+### 12. Obtener Compras Recurrentes del Negocio (Vendedor)
+```
+GET /api/mi-negocio/compras-recurrentes
+```
+**Descripción:** Obtiene todas las compras recurrentes de los productos del negocio autenticado. El negocioId se detecta automáticamente del token del usuario. Muestra las suscripciones activas que tienen los clientes a los productos del negocio.
+**Autenticación:** Requerida ✔️ (Usuario tipo NEGOCIO)
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "clienteId": 2,
+    "productoId": 5,
+    "cantidade": 3,
+    "frecuencia": "MENSUAL",
+    "dataInicio": "2026-05-21",
+    "estado": "ACTIVO"
+  },
+  {
+    "id": 2,
+    "clienteId": 3,
+    "productoId": 8,
+    "cantidade": 2,
+    "frecuencia": "SEMANAL",
+    "dataInicio": "2026-05-20",
+    "estado": "ACTIVO"
+  }
+]
+```
+**Errores:**
+- `401 Unauthorized`: Token inválido o expirado
+- `403 Forbidden`: Usuario no tiene rol NEGOCIO
+
+---
+
 ## 🧪 TEST
 
 ### 1. Test Hola
@@ -1167,7 +1203,7 @@ Content-Type: application/json
 
 ---
 
-**Última actualización:** 25 de Mayo de 2026 (Fase 3+: 11 endpoints user-scoped, incl. 2 nuevos de compras recurrentes)  
-**Versión:** 0.0.2-SNAPSHOT (Fase 3+)  
-**Estado:** ✅ 60 endpoints totales funcionales (incl. 11 user-scoped con soporte para crear compras recurrentes)
+**Última actualización:** 25 de Mayo de 2026 (Fase 3++: Panel de compras recurrentes para negocio)  
+**Versión:** 0.0.2-SNAPSHOT (Fase 3++)  
+**Estado:** ✅ 61 endpoints totales funcionales (incl. 12 user-scoped: 2 nuevos para panel de compras recurrentes)
 

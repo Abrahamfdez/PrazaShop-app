@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:praza_shop/models/negocio_dto.dart';
 import 'package:praza_shop/models/producto_dto.dart';
+import 'package:praza_shop/models/usuario_dto.dart';
 import 'package:praza_shop/services/api_service.dart';
 import 'package:praza_shop/services/negocio_service.dart';
 import 'package:praza_shop/services/producto_service.dart';
@@ -8,6 +9,7 @@ import 'package:praza_shop/utils/api_utils.dart';
 import 'package:praza_shop/screens/Negocio/crear_producto_page.dart';
 import 'package:praza_shop/screens/Negocio/editar_producto_page.dart';
 import 'package:praza_shop/screens/Negocio/ventas_page.dart';
+import 'package:praza_shop/screens/Negocio/negocio_compras_recurrentes_page.dart';
 
 /// Página del panel de negocio
 class NegocioPanelPage extends StatefulWidget {
@@ -270,6 +272,47 @@ class _NegocioPanelPageState extends State<NegocioPanelPage> {
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
                                           color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 24),
+
+                              // Botón ver compras recurrentes
+                              SizedBox(
+                                width: double.infinity,
+                                height: 48,
+                                child: OutlinedButton(
+                                  style: OutlinedButton.styleFrom(
+                                    side: BorderSide(color: green, width: 2),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => NegocioComprasRecurrentesPage(
+                                          api: widget.api,
+                                          usuario: UsuarioDto(id: 0), // Dummy, no se usa
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.repeat, color: green),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Compras recurrentes',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: green,
                                         ),
                                       ),
                                     ],

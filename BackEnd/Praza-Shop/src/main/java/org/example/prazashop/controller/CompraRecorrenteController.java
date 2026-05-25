@@ -123,5 +123,18 @@ public class CompraRecorrenteController {
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(compraCreada);
     }
+
+    /**
+     * Obtiene todas las compras recurrentes de los productos del negocio autenticado.
+     * Auto-resuelve el negocioId desde el contexto del usuario.
+     *
+     * @return lista de compras recurrentes del negocio
+     */
+    @GetMapping("/api/mi-negocio/compras-recurrentes")
+    public ResponseEntity<List<CompraRecorrenteDto>> getMisComprasRecurrentesNegocio() {
+        var negocio = usuarioContextService.getNegocioOfCurrentUser();
+        List<CompraRecorrenteDto> compras = compraRecorrenteService.findByNegocioId(negocio.getIdNegocio());
+        return ResponseEntity.ok(compras);
+    }
 }
 

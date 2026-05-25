@@ -6,9 +6,11 @@ import lombok.RequiredArgsConstructor;
 import org.example.prazashop.model.dto.CompraRecorrenteDto;
 import org.example.prazashop.model.entity.Cliente;
 import org.example.prazashop.model.entity.CompraRecorrente;
+import org.example.prazashop.model.entity.Negocio;
 import org.example.prazashop.model.entity.Producto;
 import org.example.prazashop.repository.ClienteRepository;
 import org.example.prazashop.repository.CompraRecorrenteRepository;
+import org.example.prazashop.repository.NegocioRepository;
 import org.example.prazashop.repository.ProductoRepository;
 import org.example.prazashop.service.CompraRecorrenteService;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class CompraRecorrenteServiceImpl implements CompraRecorrenteService {
     private final CompraRecorrenteRepository compraRecorrenteRepository;
     private final ClienteRepository clienteRepository;
     private final ProductoRepository productoRepository;
+    private final NegocioRepository negocioRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -105,6 +108,23 @@ public class CompraRecorrenteServiceImpl implements CompraRecorrenteService {
         CompraRecorrente entity = new CompraRecorrente();
         applyDto(entity, dto);
         return toDto(compraRecorrenteRepository.save(entity));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CompraRecorrenteDto> findByNegocioId(Long negocioId) {
+        // Obtener el negocio para validar su existencia
+        Negocio negocio = negocioRepository.findById(negocioId)
+                .orElseThrow(() -> new NotFoundException("Negocio no encontrado con id " + negocioId));
+        
+        // Obtener todos los productos del negocio
+        List<Producto> productosDelNegocio = productoRepository.findByNegocio_IdNegocio(negocioId);
+        
+        // Obtener todas las compras recurrentes de esos productos
+        return productosDelNegocio.stream()
+                .flatMap(producto -> compraRecorrenteRepository.findByProducto(producto).stream())
+                .map(this::toDto)
+                .toList();
     }
 
     private CompraRecorrenteDto toDto(CompraRecorrente compraRecorrente) {
