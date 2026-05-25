@@ -113,18 +113,35 @@ public class CompraRecorrenteServiceImpl implements CompraRecorrenteService {
     @Override
     @Transactional(readOnly = true)
     public List<CompraRecorrenteDto> findByNegocioId(Long negocioId) {
-        // Obtener el negocio para validar su existencia
-        Negocio negocio = negocioRepository.findById(negocioId)
-                .orElseThrow(() -> new NotFoundException("Negocio no encontrado con id " + negocioId));
+        if (negocioId == null) {
+            return java.util.Collections.emptyList();
+        }
         
-        // Obtener todos los productos del negocio
-        List<Producto> productosDelNegocio = productoRepository.findByNegocio_IdNegocio(negocioId);
-        
-        // Obtener todas las compras recurrentes de esos productos
-        return productosDelNegocio.stream()
-                .flatMap(producto -> compraRecorrenteRepository.findByProducto(producto).stream())
-                .map(this::toDto)
-                .toList();
+        try {
+            // Obtener todos los productos del negocio
+            List<Producto> productosDelNegocio = productoRepository.findByNegocio_IdNegocio(negocioId);
+            
+            // Si no hay productos, retornar lista vacía
+            if (productosDelNegocio.isEmpty()) {
+                return java.util.Collections.emptyList();
+            }
+            
+            // Obtener todas las compras recurrentes de esos productos
+            return productosDelNegocio.stream()
+                    .flatMap(producto -> {
+                        try {
+                            return compraRecorrenteRepository.findByProducto(producto).stream();
+                        } catch (Exception e) {
+                            // Si hay error con un producto, ignorar y continuar
+                            return java.util.stream.Stream.empty();
+                        }
+                    })
+                    .map(this::toDto)
+                    .toList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return java.util.Collections.emptyList();
+        }
     }
 
     private CompraRecorrenteDto toDto(CompraRecorrente compraRecorrente) {

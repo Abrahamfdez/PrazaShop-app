@@ -132,9 +132,18 @@ public class CompraRecorrenteController {
      */
     @GetMapping("/api/mi-negocio/compras-recurrentes")
     public ResponseEntity<List<CompraRecorrenteDto>> getMisComprasRecurrentesNegocio() {
-        var negocio = usuarioContextService.getNegocioOfCurrentUser();
-        List<CompraRecorrenteDto> compras = compraRecorrenteService.findByNegocioId(negocio.getIdNegocio());
-        return ResponseEntity.ok(compras);
+        try {
+            var negocio = usuarioContextService.getNegocioOfCurrentUser();
+            if (negocio == null || negocio.getIdNegocio() == null) {
+                return ResponseEntity.noContent().build();
+            }
+            List<CompraRecorrenteDto> compras = compraRecorrenteService.findByNegocioId(negocio.getIdNegocio());
+            return ResponseEntity.ok(compras);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Si hay error, devolver lista vacía en lugar de error 500
+            return ResponseEntity.ok(java.util.Collections.emptyList());
+        }
     }
 }
 
