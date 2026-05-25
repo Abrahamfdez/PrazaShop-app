@@ -105,5 +105,23 @@ public class CompraRecorrenteController {
         List<CompraRecorrenteDto> compras = compraRecorrenteService.findByClienteId(cliente.getIdCliente());
         return ResponseEntity.ok(compras);
     }
+
+    /**
+     * Crea una nueva compra recurrente para el cliente autenticado.
+     * Auto-resuelve el clienteId desde el contexto del usuario.
+     *
+     * @param compraRecorrenteDto datos de la compra recurrente (sin clienteId)
+     * @return compra recurrente creada
+     */
+    @PostMapping("/api/mis-compras-recurrentes")
+    public ResponseEntity<CompraRecorrenteDto> crearMiCompraRecurrente(
+            @RequestBody CompraRecorrenteDto compraRecorrenteDto) {
+        var cliente = usuarioContextService.getClienteOfCurrentUser();
+        CompraRecorrenteDto compraCreada = compraRecorrenteService.createForCliente(
+                compraRecorrenteDto,
+                cliente.getIdCliente()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(compraCreada);
+    }
 }
 

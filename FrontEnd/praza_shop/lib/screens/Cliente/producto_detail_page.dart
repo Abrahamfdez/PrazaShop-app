@@ -7,6 +7,7 @@ import 'package:praza_shop/services/negocio_service.dart';
 import 'package:praza_shop/services/valoracion_service.dart';
 import 'package:praza_shop/services/producto_service.dart';
 import 'package:praza_shop/screens/Cliente/comprar_page.dart';
+import 'package:praza_shop/screens/Cliente/crear_compra_recurrente_page.dart';
 
 /// Pantalla de detalle de producto con información completa
 class ProductoDetailPage extends StatefulWidget {
@@ -370,14 +371,19 @@ class _ProductoDetailPageState extends State<ProductoDetailPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Compra recurrente configurada'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                      },
+                      onPressed: isInStock && _negocio != null
+                          ? () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => CrearCompraRecurrentePage(
+                                    producto: widget.producto,
+                                    negocio: _negocio!,
+                                    api: widget.api,
+                                  ),
+                                ),
+                              );
+                            }
+                          : null,
                       child: const Text(
                         'Compra recurrente',
                         style: TextStyle(

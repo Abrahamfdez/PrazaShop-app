@@ -55,4 +55,13 @@ public interface CompraRecorrenteService {
      * @return the list
      */
     List<CompraRecorrenteDto> findByClienteId(Long clienteId);
+
+    /**
+     * Create compra recurrente for authenticated cliente (user-scoped endpoint).
+     *
+     * @param compraRecorrente the compra recorrente
+     * @param clienteId the cliente id (from context)
+     * @return the compra recorrente dto
+     */
+    CompraRecorrenteDto createForCliente(CompraRecorrenteDto compraRecorrente, Long clienteId);
 }

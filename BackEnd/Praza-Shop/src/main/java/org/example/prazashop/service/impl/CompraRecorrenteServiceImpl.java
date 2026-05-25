@@ -79,6 +79,34 @@ public class CompraRecorrenteServiceImpl implements CompraRecorrenteService {
                 .toList();
     }
 
+    @Override
+    public CompraRecorrenteDto createForCliente(CompraRecorrenteDto compraRecorrente, Long clienteId) {
+        // Validar que el DTO venga sin clienteId o con el mismo del contexto
+        if (compraRecorrente.getClienteId() != null && !compraRecorrente.getClienteId().equals(clienteId)) {
+            throw new BadRequestException("No puedes crear compras recurrentes para otros clientes");
+        }
+
+        // Obtener el cliente del contexto
+        Cliente cliente = clienteRepository.findById(clienteId)
+                .orElseThrow(() -> new NotFoundException("Cliente no encontrado con id " + clienteId));
+
+        // Forzar el clienteId al del contexto
+        CompraRecorrenteDto dto = CompraRecorrenteDto.builder()
+                .clienteId(clienteId)
+                .productoId(compraRecorrente.getProductoId())
+                .cantidade(compraRecorrente.getCantidade())
+                .frecuencia(compraRecorrente.getFrecuencia())
+                .dataInicio(compraRecorrente.getDataInicio())
+                .estado(compraRecorrente.getEstado() != null ? compraRecorrente.getEstado() : "ACTIVO")
+                .build();
+
+        validateDto(dto);
+
+        CompraRecorrente entity = new CompraRecorrente();
+        applyDto(entity, dto);
+        return toDto(compraRecorrenteRepository.save(entity));
+    }
+
     private CompraRecorrenteDto toDto(CompraRecorrente compraRecorrente) {
         return CompraRecorrenteDto.builder()
                 .id(compraRecorrente.getIdRecorrente())

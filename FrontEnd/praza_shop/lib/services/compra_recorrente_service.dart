@@ -56,4 +56,27 @@ class CompraRecorrenteService {
     }
     throw Exception('Get mis compras recurrentes failed: ${res.statusCode} ${res.body}');
   }
+
+  /// Crea una nueva compra recurrente para el cliente autenticado
+  /// El clienteId se auto-resuelve en el backend
+  Future<CompraRecorrenteDto> crearMiCompraRecurrente({
+    required int productoId,
+    required int cantidade,
+    required String frecuencia,
+    required DateTime dataInicio,
+  }) async {
+    final uri = Uri.parse('${api.baseUrl}/api/mis-compras-recurrentes');
+    final body = {
+      'productoId': productoId,
+      'cantidade': cantidade,
+      'frecuencia': frecuencia,
+      'dataInicio': dataInicio.toIso8601String().split('T')[0], // Format: YYYY-MM-DD
+      'estado': 'ACTIVO',
+    };
+    final res = await http.post(uri, headers: api.headers(), body: json.encode(body));
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      return CompraRecorrenteDto.fromJson(json.decode(res.body));
+    }
+    throw Exception('Create mi compra recurrente failed: ${res.statusCode} ${res.body}');
+  }
 }

@@ -13,10 +13,10 @@
 | 🔄 Compras Recurrentes | 5 | ✅ Funcionales |
 | ⭐ Valoraciones | 5 | ✅ Funcionales |
 | 👤 Usuarios | 5 | ✅ Funcionales |
-| 🛒 Endpoints User-Scoped (Fase 3) | 9 | ✅ Funcionales (NUEVOS) |
+| 🛒 Endpoints User-Scoped (Fase 3) | 11 | ✅ Funcionales (NUEVOS) |
 | 🧪 Test | 1 | ✅ Funcional |
 
-**Total: 58 Endpoints Funcionales (9 nuevos endpoints user-scoped de Fase 3 agregados)**
+**Total: 60 Endpoints Funcionales (11 endpoints user-scoped de Fase 3 agregados)**
 
 ---
 
@@ -1044,6 +1044,78 @@ PUT /api/mi-negocio/ventas/actualizar-estado-lote
 
 ---
 
+### 10. Obtener Mis Compras Recurrentes (Cliente)
+```
+GET /api/mis-compras-recurrentes
+```
+**Descripción:** Obtiene todas las compras recurrentes del cliente autenticado. El clienteId se detecta automáticamente del token del usuario.
+**Autenticación:** Requerida ✔️ (Usuario tipo CLIENTE)
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "clienteId": 2,
+    "productoId": 5,
+    "cantidade": 3,
+    "frecuencia": "MENSUAL",
+    "dataInicio": "2026-05-21",
+    "estado": "ACTIVO"
+  },
+  {
+    "id": 2,
+    "clienteId": 2,
+    "productoId": 8,
+    "cantidade": 2,
+    "frecuencia": "SEMANAL",
+    "dataInicio": "2026-05-21",
+    "estado": "ACTIVO"
+  }
+]
+```
+**Errores:**
+- `401 Unauthorized`: Token inválido o expirado
+- `403 Forbidden`: Usuario no tiene rol CLIENTE
+
+---
+
+### 11. Crear Nueva Compra Recurrente (Cliente)
+```
+POST /api/mis-compras-recurrentes
+```
+**Descripción:** Crea una nueva compra recurrente para el cliente autenticado. El clienteId se detecta automáticamente del token del usuario.
+**Autenticación:** Requerida ✔️ (Usuario tipo CLIENTE)
+**Request:**
+```json
+{
+  "productoId": 5,
+  "cantidade": 3,
+  "frecuencia": "MENSUAL",
+  "dataInicio": "2026-05-21"
+}
+```
+**Response:**
+```json
+{
+  "id": 3,
+  "clienteId": 2,
+  "productoId": 5,
+  "cantidade": 3,
+  "frecuencia": "MENSUAL",
+  "dataInicio": "2026-05-21",
+  "estado": "ACTIVO"
+}
+```
+**Errores:**
+- `400 Bad Request`: Datos inválidos (cantidad <= 0, frecuencia no válida, fecha pasada)
+- `401 Unauthorized`: Token inválido o expirado
+- `403 Forbidden`: Usuario no tiene rol CLIENTE
+- `404 Not Found`: Producto no encontrado
+- `409 Conflict`: Ya existe una compra recurrente activa para este producto
+
+---
+
 ## 🧪 TEST
 
 ### 1. Test Hola
@@ -1095,7 +1167,7 @@ Content-Type: application/json
 
 ---
 
-**Última actualización:** 20 de Mayo de 2026 (Fase 3: 9 nuevos endpoints user-scoped agregados)  
-**Versión:** 0.0.2-SNAPSHOT (Fase 3)  
-**Estado:** ✅ 58 endpoints totales funcionales (incl. 9 nuevos user-scoped)
+**Última actualización:** 25 de Mayo de 2026 (Fase 3+: 11 endpoints user-scoped, incl. 2 nuevos de compras recurrentes)  
+**Versión:** 0.0.2-SNAPSHOT (Fase 3+)  
+**Estado:** ✅ 60 endpoints totales funcionales (incl. 11 user-scoped con soporte para crear compras recurrentes)
 
