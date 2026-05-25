@@ -96,6 +96,66 @@ class _NegocioComprasRecurrentesPageState extends State<NegocioComprasRecurrente
     }
   }
 
+  /// Calcula la próxima fecha de entrega basada en la frecuencia y fecha de inicio
+  /// Si la fecha de inicio está en el pasado y está activo, calcula la siguiente entrega
+  /// Garantiza que la fecha retornada siempre sea futura
+  DateTime? _calcularProximaFecha(DateTime? dataInicio, String? frecuencia, String? estado) {
+    if (dataInicio == null || frecuencia == null || estado?.toUpperCase() != 'ACTIVO') {
+      return dataInicio;
+    }
+
+    final hoy = DateTime.now();
+    var proximaFecha = dataInicio;
+
+    // Si la fecha inicial está en el pasado, calcular la próxima entrega
+    if (proximaFecha.isBefore(hoy)) {
+      switch (frecuencia.toUpperCase()) {
+        case 'DIARIO':
+          // Próxima entrega es mañana
+          proximaFecha = DateTime(hoy.year, hoy.month, hoy.day + 1);
+          break;
+        
+        case 'SEMANAL':
+          // Continuar sumando semanas hasta que esté en el futuro
+          while (proximaFecha.isBefore(hoy)) {
+            proximaFecha = proximaFecha.add(const Duration(days: 7));
+          }
+          break;
+        
+        case 'QUINCENAL':
+          // Continuar sumando quincenas hasta que esté en el futuro
+          while (proximaFecha.isBefore(hoy)) {
+            proximaFecha = proximaFecha.add(const Duration(days: 15));
+          }
+          break;
+        
+        case 'MENSUAL':
+          // Continuar sumando meses hasta que esté en el futuro
+          var mesActual = proximaFecha.month;
+          var anoActual = proximaFecha.year;
+          var diaOriginal = proximaFecha.day;
+
+          while (proximaFecha.isBefore(hoy)) {
+            mesActual++;
+            if (mesActual > 12) {
+              mesActual = 1;
+              anoActual++;
+            }
+            try {
+              proximaFecha = DateTime(anoActual, mesActual, diaOriginal);
+            } catch (_) {
+              // Si el día no existe en ese mes (ej: 31 febrero), usar último día del mes
+              proximaFecha = DateTime(anoActual, mesActual + 1, 0);
+              mesActual++;
+            }
+          }
+          break;
+      }
+    }
+
+    return proximaFecha;
+  }
+
   String _getEstadoBadgeText(String? estado) {
     if (estado == null) return 'DESCONOCIDO';
     switch (estado.toUpperCase()) {
@@ -351,7 +411,11 @@ class _NegocioComprasRecurrentesPageState extends State<NegocioComprasRecurrente
                                           crossAxisAlignment: CrossAxisAlignment.end,
                                           children: [
                                             Text(
-                                              'Inicio',
+                                              (compra.estado?.toUpperCase() == 'ACTIVO' && 
+                                               compra.dataInicio != null && 
+                                               compra.dataInicio!.isBefore(DateTime.now()))
+                                                  ? 'Próxima entrega'
+                                                  : 'Inicio',
                                               style: TextStyle(
                                                 fontSize: 11,
                                                 color: Colors.grey[600],
@@ -360,7 +424,7 @@ class _NegocioComprasRecurrentesPageState extends State<NegocioComprasRecurrente
                                             Text(
                                               compra.dataInicio != null
                                                   ? DateFormat('dd/MM/yyyy').format(
-                                                      DateTime.parse(compra.dataInicio as String),
+                                                      _calcularProximaFecha(compra.dataInicio, compra.frecuencia, compra.estado) ?? compra.dataInicio!
                                                     )
                                                   : 'N/A',
                                               style: const TextStyle(

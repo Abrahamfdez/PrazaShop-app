@@ -72,4 +72,13 @@ public interface CompraRecorrenteService {
      * @return list of compras recurrentes for that business's products
      */
     List<CompraRecorrenteDto> findByNegocioId(Long negocioId);
+
+    /**
+     * Delete compra recurrente for authenticated cliente (user-scoped endpoint).
+     * Verifies that the compra recurrente belongs to the cliente before deleting.
+     *
+     * @param id the compra recorrente id
+     * @param clienteId the cliente id (from context)
+     */
+    void deleteForCliente(Long id, Long clienteId);
 }

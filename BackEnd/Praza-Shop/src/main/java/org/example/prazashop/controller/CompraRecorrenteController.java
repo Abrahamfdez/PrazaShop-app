@@ -145,5 +145,20 @@ public class CompraRecorrenteController {
             return ResponseEntity.ok(java.util.Collections.emptyList());
         }
     }
+
+    /**
+     * Elimina una compra recurrente del cliente autenticado.
+     * Auto-resuelve el clienteId desde el contexto del usuario.
+     * Verifica que la compra pertenece al cliente antes de eliminar.
+     *
+     * @param id identificador de la compra recurrente
+     * @return respuesta vacía
+     */
+    @DeleteMapping("/api/mis-compras-recurrentes/{id}")
+    public ResponseEntity<Void> deleteMiCompraRecurrente(@PathVariable Long id) {
+        var cliente = usuarioContextService.getClienteOfCurrentUser();
+        compraRecorrenteService.deleteForCliente(id, cliente.getIdCliente());
+        return ResponseEntity.noContent().build();
+    }
 }
 

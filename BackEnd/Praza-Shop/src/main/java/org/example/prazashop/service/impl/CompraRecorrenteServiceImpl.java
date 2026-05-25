@@ -170,4 +170,19 @@ public class CompraRecorrenteServiceImpl implements CompraRecorrenteService {
             throw new BadRequestException("dataInicio es obligatoria");
         }
     }
+
+    @Override
+    @Transactional
+    public void deleteForCliente(Long id, Long clienteId) {
+        // Obtener la compra recurrente
+        CompraRecorrente compra = compraRecorrenteRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Compra recorrente no encontrada con id " + id));
+
+        // Verificar que pertenece al cliente autenticado
+        if (!compra.getCliente().getIdCliente().equals(clienteId)) {
+            throw new BadRequestException("No puedes eliminar compras recurrentes de otros clientes");
+        }
+
+        compraRecorrenteRepository.deleteById(id);
+    }
 }

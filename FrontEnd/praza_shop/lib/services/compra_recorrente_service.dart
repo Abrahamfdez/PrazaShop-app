@@ -39,7 +39,7 @@ class CompraRecorrenteService {
   }
 
   Future<void> delete(int id) async {
-    final uri = Uri.parse('${api.baseUrl}/api/compras-recorrentes/$id');
+    final uri = Uri.parse('${api.baseUrl}/api/mis-compras-recurrentes/$id');
     final res = await http.delete(uri, headers: api.headers(jsonBody: false));
     if (res.statusCode != 200 && res.statusCode != 204) throw Exception('Delete compra-recorrente failed: ${res.statusCode} ${res.body}');
   }
