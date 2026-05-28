@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:praza_shop/models/producto_dto.dart';
+import 'package:praza_shop/models/categoria_enum.dart';
 import 'package:praza_shop/services/api_service.dart';
 import 'package:praza_shop/services/producto_service.dart';
 import 'package:praza_shop/services/negocio_service.dart';
@@ -25,11 +26,11 @@ class _CrearProductoPageState extends State<CrearProductoPage> {
   final _prezoCtl = TextEditingController();
   final _stockCtl = TextEditingController();
   final _imagenUrlCtl = TextEditingController();
-  final _categoriaCtl = TextEditingController();
 
   late ProductoService _productoService;
   late NegocioService _negocioService;
   bool _loading = false;
+  CategoriaProducto _categoriaSeleccionada = CategoriaProducto.froitas;
 
   @override
   void initState() {
@@ -46,7 +47,6 @@ class _CrearProductoPageState extends State<CrearProductoPage> {
     _prezoCtl.dispose();
     _stockCtl.dispose();
     _imagenUrlCtl.dispose();
-    _categoriaCtl.dispose();
     super.dispose();
   }
 
@@ -83,7 +83,7 @@ class _CrearProductoPageState extends State<CrearProductoPage> {
         prezo: double.parse(_prezoCtl.text),
         stock: int.parse(_stockCtl.text),
         imaxe: _imagenUrlCtl.text.trim(),
-        categoria: _categoriaCtl.text.trim(),
+        categoria: _categoriaSeleccionada.displayName,
         // No es necesario establecer negocioId, lo auto-resuelve el backend
       );
 
@@ -157,12 +157,7 @@ class _CrearProductoPageState extends State<CrearProductoPage> {
               const SizedBox(height: 12),
 
               // Categoría
-              _buildFormField(
-                label: 'Categoría',
-                controller: _categoriaCtl,
-                hint: 'Ej: Frutas, Verduras',
-                validator: (v) => _validarNoVacio(v, 'a categoría'),
-              ),
+              _buildCategoryDropdown(),
               const SizedBox(height: 12),
 
               // Descripción
@@ -295,6 +290,45 @@ class _CrearProductoPageState extends State<CrearProductoPage> {
           maxLines: maxLines,
           keyboardType: keyboardType,
           validator: validator,
+        ),
+      ],
+    );
+  }
+
+  /// Widget para selector de categoría como dropdown
+  Widget _buildCategoryDropdown() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Categoría',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey[300]!),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: DropdownButton<CategoriaProducto>(
+            value: _categoriaSeleccionada,
+            isExpanded: true,
+            underline: const SizedBox.shrink(),
+            items: CategoriaProducto.values
+                .map((categoria) => DropdownMenuItem(
+                      value: categoria,
+                      child: Text(categoria.displayName),
+                    ))
+                .toList(),
+            onChanged: (categoria) {
+              if (categoria != null) {
+                setState(() {
+                  _categoriaSeleccionada = categoria;
+                });
+              }
+            },
+          ),
         ),
       ],
     );

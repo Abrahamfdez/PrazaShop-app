@@ -237,6 +237,45 @@ class _NegocioPanelPageState extends State<NegocioPanelPage> {
                                 ],
                               ),
 
+                              const SizedBox(height: 16),
+
+                              // Stock total
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue[50],
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.blue[200]!,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Stock total:',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.blue[900],
+                                      ),
+                                    ),
+                                    Text(
+                                      '${_productos.fold<int>(0, (sum, p) => sum + (p.stock ?? 0))} unidades',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.blue[900],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
                               const SizedBox(height: 24),
 
                               // Botón añadir producto
@@ -366,8 +405,22 @@ class _NegocioPanelPageState extends State<NegocioPanelPage> {
                                         borderRadius:
                                             BorderRadius.circular(12),
                                         border: Border.all(
-                                          color: Colors.grey[200]!,
+                                          color: isLowStock
+                                              ? Colors.orange[300]!
+                                              : Colors.grey[200]!,
+                                          width: isLowStock ? 2 : 1,
                                         ),
+                                        boxShadow: isLowStock
+                                            ? [
+                                                BoxShadow(
+                                                  color: Colors.orange
+                                                      .withOpacity(0.1),
+                                                  blurRadius: 8,
+                                                  offset:
+                                                      const Offset(0, 2),
+                                                )
+                                              ]
+                                            : [],
                                       ),
                                       child: Row(
                                         children: [
@@ -436,7 +489,7 @@ class _NegocioPanelPageState extends State<NegocioPanelPage> {
                                                   padding: const EdgeInsets
                                                       .symmetric(
                                                     horizontal: 8,
-                                                    vertical: 2,
+                                                    vertical: 4,
                                                   ),
                                                   decoration: BoxDecoration(
                                                     color: isLowStock
@@ -446,18 +499,21 @@ class _NegocioPanelPageState extends State<NegocioPanelPage> {
                                                         BorderRadius.circular(
                                                           4,
                                                         ),
+                                                    border: Border.all(
+                                                      color: isLowStock
+                                                          ? Colors.orange[200]!
+                                                          : Colors.green[200]!,
+                                                    ),
                                                   ),
                                                   child: Text(
-                                                    isLowStock
-                                                        ? 'Baixo stock'
-                                                        : 'En stock',
+                                                    'Stock: ${producto.stock ?? 0} unidades',
                                                     style: TextStyle(
-                                                      fontSize: 11,
+                                                      fontSize: 12,
                                                       color: isLowStock
                                                           ? Colors.orange[700]
                                                           : Colors.green[700],
                                                       fontWeight:
-                                                          FontWeight.w500,
+                                                          FontWeight.w600,
                                                     ),
                                                   ),
                                                 ),

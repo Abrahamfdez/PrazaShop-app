@@ -186,10 +186,15 @@ class PedidoService {
     required String nuevoEstado,
   }) async {
     final uri = Uri.parse('${api.baseUrl}/api/mi-negocio/ventas/$pedidoId/estado');
-    final body = json.encode({
+    final bodyMap = {
       'nuevoEstado': nuevoEstado,
-    });
+    };
+    final body = json.encode(bodyMap);
+    print('DEBUG: Actualizando estado - URI: $uri');
+    print('DEBUG: Body enviado: $body');
     final res = await http.put(uri, headers: api.headers(), body: body);
+    print('DEBUG: Response status: ${res.statusCode}');
+    print('DEBUG: Response body: ${res.body}');
     if (res.statusCode == 200) {
       return PedidoConDetallesDto.fromJson(json.decode(res.body));
     }

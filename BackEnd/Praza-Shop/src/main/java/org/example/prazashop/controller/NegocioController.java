@@ -117,7 +117,7 @@ public class NegocioController {
         }
         
         // Validar que el usuario autenticado es dueño del negocio
-        NegocioDto negocioDto = negocioService.findById(id);
+        var negocioDto = negocioService.findById(id);
         // Aquí extraemos el email del usuario propietario del negocio
         if (!negocioService.isOwnerOfNegocio(id, authenticatedEmail)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

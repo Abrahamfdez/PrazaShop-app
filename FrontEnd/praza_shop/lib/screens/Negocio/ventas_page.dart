@@ -106,8 +106,11 @@ class _VentasPageState extends State<VentasPage> {
   /// Actualiza el estado de un pedido
   Future<void> _actualizarEstadoPedido(PedidoConDetallesDto pedido, String nuevoEstado) async {
     try {
-      // Actualizar en backend
-      await _pedidoService.update(pedido.idPedido!.toInt(), _crearPedidoDtoActualizado(pedido, nuevoEstado));
+      // Actualizar en backend usando el endpoint específico
+      await _pedidoService.actualizarEstadoPedido(
+        pedidoId: pedido.idPedido!.toInt(),
+        nuevoEstado: nuevoEstado,
+      );
 
       // Recargar pedidos
       await _cargarPedidos();
@@ -128,18 +131,6 @@ class _VentasPageState extends State<VentasPage> {
         ),
       );
     }
-  }
-
-  /// Crea un PedidoDto con estado actualizado para enviar al backend
-  dynamic _crearPedidoDtoActualizado(PedidoConDetallesDto pedido, String nuevoEstado) {
-    return {
-      'id': pedido.idPedido,
-      'clienteId': pedido.clienteId,
-      'negocioId': pedido.negocioId,
-      'dataPedido': pedido.dataPedido?.toIso8601String(),
-      'estado': nuevoEstado,
-      'total': pedido.total,
-    };
   }
 
   /// Muestra diálogo para cambiar estado

@@ -184,7 +184,7 @@ class PedidoCard extends StatelessWidget {
                                       ),
                                     ),
                                     Text(
-                                      'Cant: ${detalle.cantidade}',
+                                      'Cant: ${detalle.cantidade} x €${detalle.prezoUnitario?.toStringAsFixed(2) ?? '0.00'}',
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.grey[600],

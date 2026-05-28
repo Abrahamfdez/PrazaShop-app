@@ -9,6 +9,7 @@ import org.example.prazashop.repository.PedidoRepository;
 import org.example.prazashop.confg.ratelimit.RateLimit;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -312,6 +313,7 @@ public class PedidoController {
      * @return 200 OK con PedidoConDetallesDto o 409 CONFLICT si hay error
      */
     @PutMapping("/api/mi-negocio/ventas/{pedidoId}/estado")
+    @Transactional
     public ResponseEntity<PedidoConDetallesDto> actualizarEstadoPedido(
             @PathVariable Long pedidoId,
             @Valid @RequestBody PedidoActualizarEstadoRequest request) {
