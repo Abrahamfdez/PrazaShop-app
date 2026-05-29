@@ -126,18 +126,82 @@ class _ClienteHomePageState extends State<ClienteHomePage>
     });
   }
 
+  /// Normaliza cadenas removiendo acentos para comparación
+  String _normalizarTexto(String texto) {
+    // Primero limpiar caracteres inválidos UTF-8 comunes
+    String result = texto;
+    
+    // Reemplazar errores comunes de encoding UTF-8 doble
+    result = result.replaceAll('Ã­', 'í');
+    result = result.replaceAll('Ã¡', 'á');
+    result = result.replaceAll('Ã©', 'é');
+    result = result.replaceAll('Ã³', 'ó');
+    result = result.replaceAll('Ã©', 'é');
+    result = result.replaceAll('Ã', 'a');
+    
+    // Convertir a minúsculas
+    result = result.toLowerCase();
+    
+    // Convertir a minúsculas y remover acentos/caracteres especiales
+    const Map<String, String> accents = {
+      'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+      'à': 'a', 'è': 'e', 'ì': 'i', 'ò': 'o', 'ù': 'u',
+      'â': 'a', 'ê': 'e', 'î': 'i', 'ô': 'o', 'û': 'u',
+      'ã': 'a', 'õ': 'o', 'ñ': 'n',
+      'ä': 'a', 'ë': 'e', 'ï': 'i', 'ö': 'o', 'ü': 'u',
+    };
+    
+    accents.forEach((key, value) {
+      result = result.replaceAll(key, value);
+    });
+    return result;
+  }
+
   /// Filtra productos por categoría y búsqueda
   void _filtrarProductos() {
     final busqueda = _searchCtl.text.toLowerCase();
 
     setState(() {
+      print('\n=== DEBUG FILTRO HOME ===');
+      print('_categoriaSeleccionada = "$_categoriaSeleccionada"');
+      final categoriaNorm = _normalizarTexto(_categoriaSeleccionada);
+      print('Categoría normalizada = "$categoriaNorm"');
+      print('Total productos = ${_todosProgramas.length}');
+      
+      // Debug: mostrar todas las categorías únicas en los productos
+      final categoriasUnicas = _todosProgramas
+          .map((p) => p.categoria)
+          .where((c) => c != null)
+          .toSet()
+          .toList();
+      print('Categorías únicas en BD: $categoriasUnicas');
+      
+      for (var cat in categoriasUnicas) {
+        final catNorm = _normalizarTexto(cat ?? '');
+        print('  "$cat" → normalizada: "$catNorm" (coincide: ${catNorm == categoriaNorm})');
+      }
+      
       _productosFiltered = _todosProgramas.where((p) {
-        final coincibeCategoria = _categoriaSeleccionada == 'Todos' ||
-            p.categoria?.toLowerCase() == _categoriaSeleccionada.toLowerCase();
+        bool coincibeCategoria;
+        
+        if (_categoriaSeleccionada == 'Todos') {
+          coincibeCategoria = true;
+        } else {
+          // Normalizar ambas cadenas para comparación
+          final productoCategoria = p.categoria?.trim() ?? '';
+          final categoriaNormalizada = _normalizarTexto(productoCategoria);
+          final categoriaSeleccionadaNormalizada = _normalizarTexto(_categoriaSeleccionada);
+          
+          coincibeCategoria = categoriaNormalizada == categoriaSeleccionadaNormalizada;
+        }
+        
         final coincibeBusqueda =
             p.nome?.toLowerCase().contains(busqueda) ?? false;
         return coincibeCategoria && coincibeBusqueda;
       }).toList();
+      
+      print('Filtro resultado: ${_productosFiltered.length} productos encontrados');
+      print('===\n');
     });
   }
 

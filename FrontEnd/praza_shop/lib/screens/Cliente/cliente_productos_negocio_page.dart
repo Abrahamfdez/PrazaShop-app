@@ -69,12 +69,20 @@ class _ClienteProductosNegocioPageState
     try {
       // Obtener todos los productos y filtrar por negocio
       final response = await widget.api.getProductos();
+      print('DEBUG: Total productos obtenidos: ${response.length}');
+      print('DEBUG: Buscando productos para negocioId: ${widget.negocio.id}');
+      
+      // Debug: mostrar todos los productos
+      for (var p in response) {
+        print('DEBUG: Producto ${p.id}: negocioId=${p.negocioId}, estado=${p.estado}, nombre=${p.nome}');
+      }
+      
       final productosNegocio = response
           .where((p) =>
-              p.negocioId == widget.negocio.id &&
-              p.estado != null &&
-              p.estado == "ACTIVO")
+              p.negocioId == widget.negocio.id)
           .toList();
+      
+      print('DEBUG: Productos encontrados para este negocio: ${productosNegocio.length}');
 
       setState(() {
         _todosProductos = productosNegocio;
@@ -82,6 +90,7 @@ class _ClienteProductosNegocioPageState
       });
       return productosNegocio;
     } catch (e) {
+      print('ERROR cargando productos: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error ao cargar productos: $e')),
@@ -91,18 +100,49 @@ class _ClienteProductosNegocioPageState
     }
   }
 
+  /// Normaliza cadenas removiendo acentos para comparación
+  String _normalizarTexto(String texto) {
+    // Convertir a minúsculas y remover acentos/caracteres especiales
+    const Map<String, String> accents = {
+      'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+      'à': 'a', 'è': 'e', 'ì': 'i', 'ò': 'o', 'ù': 'u',
+      'â': 'a', 'ê': 'e', 'î': 'i', 'ô': 'o', 'û': 'u',
+      'ã': 'a', 'õ': 'o', 'ñ': 'n',
+      'ä': 'a', 'ë': 'e', 'ï': 'i', 'ö': 'o', 'ü': 'u',
+    };
+    
+    String result = texto.toLowerCase();
+    accents.forEach((key, value) {
+      result = result.replaceAll(key, value);
+    });
+    return result;
+  }
+
   /// Filtra productos por categoría y búsqueda
   void _filtrarProductos() {
     final busqueda = _searchCtl.text.toLowerCase();
 
     setState(() {
       _productosFiltered = _todosProductos.where((p) {
-        final coincibeCategoria = _categoriaSeleccionada == 'Todos' ||
-            p.categoria?.toLowerCase() == _categoriaSeleccionada.toLowerCase();
+        bool coincibeCategoria;
+        
+        if (_categoriaSeleccionada == 'Todos') {
+          coincibeCategoria = true;
+        } else {
+          // Normalizar ambas cadenas para comparación
+          final productoCategoria = p.categoria?.trim() ?? '';
+          final categoriaNormalizada = _normalizarTexto(productoCategoria);
+          final categoriaSeleccionadaNormalizada = _normalizarTexto(_categoriaSeleccionada);
+          
+          coincibeCategoria = categoriaNormalizada == categoriaSeleccionadaNormalizada;
+        }
+        
         final coincibeBusqueda =
             p.nome?.toLowerCase().contains(busqueda) ?? false;
         return coincibeCategoria && coincibeBusqueda;
       }).toList();
+      
+      print('DEBUG: Filtro Negocio - Categoría: $_categoriaSeleccionada, Productos encontrados: ${_productosFiltered.length}');
     });
   }
 
