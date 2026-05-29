@@ -52,7 +52,6 @@ class _CrearCompraRecurrentePageState extends State<CrearCompraRecurrentePage> {
       initialDate: _fechaInicio ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(DateTime.now().year + 10),
-      locale: const Locale('es', 'ES'),
     );
     if (picked != null && picked != _fechaInicio) {
       setState(() {
