@@ -13,10 +13,10 @@
 | 🔄 Compras Recurrentes | 5 | ✅ Funcionales |
 | ⭐ Valoraciones | 5 | ✅ Funcionales |
 | 👤 Usuarios | 5 | ✅ Funcionales |
-| 🛒 Endpoints User-Scoped (Fase 3) | 12 | ✅ Funcionales (NUEVOS) |
+| 🛒 Endpoints User-Scoped | 12 | ✅ Funcionales |
 | 🧪 Test | 1 | ✅ Funcional |
 
-**Total: 61 Endpoints Funcionales (12 endpoints user-scoped de Fase 3 agregados)**
+**Total: 61 Endpoints Funcionales **
 
 ---
 
